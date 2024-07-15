@@ -48,7 +48,7 @@ jobs:
       environment: "stage"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
-    needs: [ build-docker, cdk-diff-stage ]
+    needs: [ cdk-diff-stage ]
 
   eks-deploy-stage:
     if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/')
