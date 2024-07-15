@@ -38,7 +38,7 @@ jobs:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ build-maven ]
   cdk-deploy-stage:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: CDK deploy to Stage
     uses: ./.github/workflows/cdk-deploy.yml
     with:
@@ -52,7 +52,7 @@ jobs:
     uses: ./.github/workflows/eks-deploy.yml
     with:
       environment: "stage"
-    needs: [cdk-diff-stage, build-docker]
+    needs: [cdk-diff-stage, build-docker, cdk-deploy-stage]
   cdk-deploy-prod:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: CDK deploy to Prod
