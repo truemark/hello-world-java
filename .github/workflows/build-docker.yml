@@ -91,10 +91,10 @@ jobs:
 
       - name: Create Version Artifact
         run: |
-          echo ${{ inputs.version }} > docker-version.txt
+          echo ${{ inputs.version }} > image-tag.txt
 
       - name: Upload Docker Image Tag
         uses: actions/upload-artifact@v3
         with:
-          name: docker-version
-          path: docker-version.txt
+          name: image-tag
+          path: image-tag.txt

@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v3
         with:
-          name: docker-version
+          name: image-tag
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -44,7 +44,7 @@ jobs:
       - name: Get Docker Image Tag
         shell: bash
         run: | 
-          echo "IMAGE_TAG=$(cat docker-version.txt)" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$(cat image-tag.txt)" >> $GITHUB_ENV
 
       - name: Setup Cluster Access
         run: |
@@ -60,4 +60,4 @@ jobs:
         env:
           KUBE_CONFIG_DATA: ${{ env.KUBE_CONFIG_DATA }}
         with:
-          command: helm upgrade --install --wait --atomic --set image.tag=$IMAGE_TAG -f helm-chart/hello-world/values.yaml hello-world helm-chart/hello-world
+          command: helm upgrade --install -n hello-world --create-namespace --wait --atomic --set image.tag=$IMAGE_TAG -f helm-chart/hello-world/values.yaml hello-world helm-chart/hello-world
