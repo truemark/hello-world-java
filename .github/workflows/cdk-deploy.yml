@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     container: # Replace with GitHub action in the future
       image: public.ecr.aws/truemark/aws-cdk:ubuntu
+    environment: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v4
 
