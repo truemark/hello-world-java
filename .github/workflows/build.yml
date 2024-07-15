@@ -16,6 +16,7 @@ jobs:
       version: 61.${{ github.run_number }}.${{ github.run_attempt }}
       java_version: 21
       java_distribution: "corretto"
+
   build-docker:
     name: Build Docker
     uses: ./.github/workflows/build-docker.yml
@@ -28,6 +29,7 @@ jobs:
       docker_hub_username: ${{ secrets.DOCKER_HUB_USERNAME }}
       docker_hub_password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
     needs: [ build-maven ]
+
   cdk-diff-stage:
     if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: CDK diff to Stage
@@ -37,6 +39,7 @@ jobs:
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ build-maven ]
+
   cdk-deploy-stage:
     if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: CDK deploy to Stage
@@ -46,6 +49,7 @@ jobs:
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ cdk-diff-stage ]
+
   eks-deploy-stage:
     if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: EKS deploy to Stage
@@ -53,6 +57,7 @@ jobs:
     with:
       environment: "stage"
     needs: [ cdk-deploy-stage ]
+
   cdk-diff-prod:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: CDK diff to Prod
@@ -61,7 +66,8 @@ jobs:
       environment: "prod"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
-    needs: [ build-maven, build-docker ]
+    needs: [ build-docker ]
+
   cdk-deploy-prod:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: CDK deploy to Prod
@@ -70,7 +76,8 @@ jobs:
       environment: "prod"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
-    needs: [ cdk-diff-prod, build-docker ]
+    needs: [ cdk-diff-prod ]
+
   eks-deploy-prod:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: EKS deploy to Prod
