@@ -18,6 +18,8 @@ fullnameOverride: "hello-world"
 env:
   - name: MESSAGE
     value: "I love ArgoCD!"
+  - name: APP_VERSION
+    value: "1.0.0"
 
 serviceAccount:
   # Specifies whether a service account should be created
