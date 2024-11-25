@@ -8,31 +8,21 @@ spec:
   selector:
     app: istio-gateway-external
   servers:
-    {{- range $server := .Values.istio.externalGateway.servers }}
-    - port:
-        number: {{ $server.port.number }}
-        name: {{ $server.port.name }}
-        protocol: {{ $server.port.protocol }}
-      {{- if eq $server.port.protocol "HTTPS" }}
-      tls:
-        mode: SIMPLE
-        {{- if $server.tls.credentialName }}
-        credentialName: {{ $server.tls.credentialName }}
-        {{- end }}
-        {{- if $server.tls.minProtocolVersion }}
-        minProtocolVersion: {{ $server.tls.minProtocolVersion }}
-        {{- end }}
-        {{- if $server.tls.maxProtocolVersion }}
-        maxProtocolVersion: {{ $server.tls.maxProtocolVersion }}
-        {{- end }}
-      {{- else if eq $server.port.protocol "TLS" }}
-      tls:
-        mode: PASSTHROUGH
-      {{- end }}
-      hosts:
-        {{- if $server.hosts }}
-        {{- toYaml $server.hosts | nindent 8 }}
-        {{- else }}
-        - "*"
-        {{- end }}
-    {{- end }}
+  {{- toYaml .Values.istio.externalGateway.servers | nindent 2 }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "truemark.fullname" . }}
+spec:
+  hosts:
+    - {{ index (index .Values.istio.externalGateway.servers 0).hosts 0 }}
+  gateways:
+    - {{ include "truemark.fullname" . }}
+  http:
+    - name: {{ include "truemark.fullname" . }}
+      route:
+        - destination:
+            host: {{ include "truemark.fullname" . }}
+            port:
+              number: {{ .Values.service.port }}

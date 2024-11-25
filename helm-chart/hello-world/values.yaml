@@ -89,8 +89,8 @@ istio:
       - port:
           number: 443
           name: https
-          protocol: HTTPS
+          protocol: HTTP
         hosts:
           - "hello.louie.truemark.io"
-  isDelegate: false
+
 
