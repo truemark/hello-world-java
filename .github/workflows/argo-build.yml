@@ -28,8 +28,6 @@ jobs:
     needs: [build-maven]
   eks-deploy-prod:
     if: github.ref == 'refs/heads/argocd-demo-louie'
-    name: Deploy to Prod
+    name: Deploy to Prod using ArgoCD
     uses: ./.github/workflows/argo-deploy.yml
-    with:
-      environment: "prod"
     needs: [build-docker]
