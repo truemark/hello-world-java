@@ -1,3 +1,4 @@
+{{- $allHosts := dict }}
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
@@ -19,6 +20,9 @@ spec:
       {{- end }}
       hosts:
         {{- if $server.hosts }}
+        {{- range $host := $server.hosts }}
+        {{- $_ := set $allHosts $host true }}
+        {{- end }}
         {{- toYaml $server.hosts | nindent 8 }}
         {{- else }}
         - "*"
@@ -31,14 +35,8 @@ metadata:
   name: {{ include "truemark.fullname" . }}
 spec:
   hosts:
-    {{- if .Values.istio.externalGateway.servers }}
-    {{- range $server := .Values.istio.externalGateway.servers }}
-    {{- range $host := $server.hosts }}
-    - {{ $host | default "*" }}
-    {{- end }}
-    {{- end }}
-    {{- else }}
-    - "*"
+    {{- range $host, $val := $allHosts }}
+    - {{ $host }}
     {{- end }}
   gateways:
     - {{ include "truemark.fullname" . }}
