@@ -83,24 +83,24 @@ istio:
   http:
     name: hello-world
     destination:
-      host: svc/hello-world
+      host: hello-world
       port: 80
 
-#istio:
-#  externalGateway:
-#    servers:
-#    - port:
-#        number: 80
-#        name: http
-#        protocol: HTTP
-#      tls:
-#        httpsRedirect: true
-#      hosts:
-#        - "stage.louie.truemark.io"
-#    - port:
-#        number: 443
-#        name: https
-#        protocol: HTTP
-#      hosts:
-#        - "stage.louie.truemark.io"
+istio:
+  externalGateway:
+    servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      tls:
+        httpsRedirect: true
+      hosts:
+        - "stage.louie.truemark.io"
+    - port:
+        number: 443
+        name: https
+        protocol: HTTP
+      hosts:
+        - "stage.louie.truemark.io"
 
