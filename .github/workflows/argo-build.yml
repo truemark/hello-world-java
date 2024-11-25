@@ -1,3 +1,4 @@
+name: ArgoCD Demo
 on:
   workflow_dispatch:
   push:
