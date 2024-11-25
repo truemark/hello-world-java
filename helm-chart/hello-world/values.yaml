@@ -83,7 +83,7 @@ istio:
   gateways:
     - istio-ingress/external
   hosts:
-    - hello.louie.truemark.io
+    - [hello.louie.truemark.io]
   http:
     name: hello-world
     destination:
