@@ -46,4 +46,4 @@ spec:
         - destination:
             host: {{ include "truemark.fullname" . }}
             port:
-              number: {{ (index .Values.istio.externalGateway.servers 0).port.number }}
+              number: {{ .Values.service.port }}
