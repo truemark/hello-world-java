@@ -75,7 +75,7 @@ istio:
   enabled: true
   virtualService:
     name: hello-world
-    namespace: hello-world
+    namespace: louie
   gateways:
     - istio-ingress/external
   hosts:
