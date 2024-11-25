@@ -27,4 +27,4 @@ spec:
     - destination:
         host: {{ include "truemark.fullname" . }}
         port:
-          number: {{ .Values.istio.http.destination.port }} }
+          number: {{ .Values.service.port }} }
