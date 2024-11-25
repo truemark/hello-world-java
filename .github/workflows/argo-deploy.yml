@@ -1,15 +1,14 @@
 name: ArgoCD Deployment
 
 on:
-  workflow_dispatch:
-  push:
-      branches:
-      - argocd-demo-louie
+  workflow_call:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Update values.yaml
         run: |
           cd helm-chart/hello-world
