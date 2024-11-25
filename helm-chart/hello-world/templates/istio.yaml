@@ -10,19 +10,19 @@
 {{/*  servers:*/}}
 {{/*  {{- toYaml .Values.istio.externalGateway.servers | nindent 2 }}*/}}
 {{/*---*/}}
-{{/*apiVersion: networking.istio.io/v1alpha3*/}}
-{{/*kind: VirtualService*/}}
-{{/*metadata:*/}}
-{{/*  name: {{ include "truemark.fullname" . }}*/}}
-{{/*spec:*/}}
-{{/*  hosts:*/}}
-{{/*    - "*"*/}}
-{{/*  gateways:*/}}
-{{/*    - {{ include "truemark.fullname" . }}*/}}
-{{/*  http:*/}}
-{{/*  - name: {{ include "truemark.fullname" . }}*/}}
-{{/*    route:*/}}
-{{/*    - destination:*/}}
-{{/*        host: {{ include "truemark.fullname" . }}*/}}
-{{/*        port:*/}}
-{{/*          number: {{ .Values.service.port }}*/}}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "truemark.fullname" . }}
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - {{ include "truemark.fullname" . }}
+  http:
+  - name: {{ include "truemark.fullname" . }}
+    route:
+    - destination:
+        host: {{ include "truemark.fullname" . }}
+        port:
+          number: {{ .Values.service.port }}
