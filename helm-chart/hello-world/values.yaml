@@ -84,7 +84,7 @@ istio:
     name: hello-world
     destination:
       host: hello-world
-      port: 80
+      port: 8080
 #  externalGateway:
 #    servers:
 #    - port:
