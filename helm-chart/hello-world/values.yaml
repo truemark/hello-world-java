@@ -83,7 +83,7 @@ istio:
   http:
     name: hello-world
     destination:
-      host: hello-world
+      host: svc/hello-world
       port: 80
 
 #istio:
