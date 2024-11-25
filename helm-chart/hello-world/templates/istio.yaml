@@ -8,7 +8,22 @@ spec:
   selector:
     app: istio-gateway-external
   servers:
-  {{- toYaml .Values.istio.externalGateway.servers | nindent 2 }}
+    {{- range $server := .Values.istio.externalGateway.servers }}
+    - port:
+        number: {{ $server.port.number }}
+        name: {{ $server.port.name }}
+        protocol: {{ $server.port.protocol }}
+      {{- if $server.tls }}
+      tls:
+        {{- toYaml $server.tls | nindent 8 }}
+      {{- end }}
+      hosts:
+        {{- if $server.hosts }}
+        {{- toYaml $server.hosts | nindent 8 }}
+        {{- else }}
+        - "*"
+        {{- end }}
+    {{- end }}
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
