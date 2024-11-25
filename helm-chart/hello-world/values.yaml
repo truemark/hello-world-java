@@ -85,8 +85,6 @@ istio:
     destination:
       host: hello-world
       port: 80
-
-istio:
   externalGateway:
     servers:
     - port:
