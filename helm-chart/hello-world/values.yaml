@@ -16,7 +16,7 @@ nameOverride: ""
 fullnameOverride: "hello-world"
 
 env:
-  - name: message
+  - name: MESSAGE
     value: "Louie"
 
 serviceAccount:
