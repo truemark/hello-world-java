@@ -15,9 +15,9 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: "hello-world"
 
-env:
-  - name: MESSAGE
-    value: "Louie"
+env: {}
+#  - name: MESSAGE
+#    value: "Louie"
 
 serviceAccount:
   # Specifies whether a service account should be created

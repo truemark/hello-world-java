@@ -18,7 +18,7 @@ spec:
   hosts:
     - {{ index (index .Values.istio.externalGateway.servers 0).hosts 0 }}
   gateways:
-    - {{ include "truemark.fullname" . }}
+      - istio-ingress/external
   http:
     - name: {{ include "truemark.fullname" . }}
       route:
