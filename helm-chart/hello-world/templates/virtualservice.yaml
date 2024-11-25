@@ -1,24 +1,24 @@
-{{- if .Values.istio.enabled }}
-apiVersion: networking.istio.io/v1beta1
-kind: VirtualService
-metadata:
-  name: {{ .Values.istio.virtualService.name }}
-  namespace: {{ .Values.istio.virtualService.namespace }}
-spec:
-  gateways:
-    {{- range .Values.istio.gateways }}
-    - {{ . }}
-    {{- end }}
-  hosts:
-    {{- range .Values.istio.hosts }}
-    - {{ . }}
-    {{- end }}
-  http:
-    - name: {{ .Values.istio.http.name }}
-      route:
-        - destination:
-            host: {{ .Values.istio.http.destination.host }}
-            port:
-              number: {{ .Values.istio.http.destination.port }}
-{{- end }}
+{{/*{{- if .Values.istio.enabled }}*/}}
+{{/*apiVersion: networking.istio.io/v1beta1*/}}
+{{/*kind: VirtualService*/}}
+{{/*metadata:*/}}
+{{/*  name: {{ .Values.istio.virtualService.name }}*/}}
+{{/*  namespace: {{ .Values.istio.virtualService.namespace }}*/}}
+{{/*spec:*/}}
+{{/*  gateways:*/}}
+{{/*    {{- range .Values.istio.gateways }}*/}}
+{{/*    - {{ . }}*/}}
+{{/*    {{- end }}*/}}
+{{/*  hosts:*/}}
+{{/*    {{- range .Values.istio.hosts }}*/}}
+{{/*    - {{ . }}*/}}
+{{/*    {{- end }}*/}}
+{{/*  http:*/}}
+{{/*    - name: {{ .Values.istio.http.name }}*/}}
+{{/*      route:*/}}
+{{/*        - destination:*/}}
+{{/*            host: {{ .Values.istio.http.destination.host }}*/}}
+{{/*            port:*/}}
+{{/*              number: {{ .Values.istio.http.destination.port }}*/}}
+{{/*{{- end }}*/}}
 
