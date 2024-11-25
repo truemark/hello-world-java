@@ -90,6 +90,4 @@ istio:
         number: 443
         name: https
         protocol: HTTP
-      hosts:
-        - "hello.louie.truemark.io"
 
