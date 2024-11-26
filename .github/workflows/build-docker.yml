@@ -48,7 +48,7 @@ jobs:
 
       - name: Login to ECR
         id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v4
+        uses: aws-actions/amazon-ecr-login@v2
         if: env.AWS_ASSUME_ROLE != ''
 #        with:
 #          registry-type: public
