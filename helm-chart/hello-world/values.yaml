@@ -5,6 +5,7 @@
 replicaCount: 1
 
 # Sets the number of old replica sets to keep in Argo.
+# If one is not set it defaults to 5.
 revisionHistoryLimit: 3
 
 image:
