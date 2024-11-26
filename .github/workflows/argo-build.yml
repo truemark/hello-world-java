@@ -35,7 +35,9 @@ jobs:
   eks-deploy-prod:
     if: github.ref == 'refs/heads/argocd-demo-louie'
     name: Deploy using ArgoCD
-    uses: ./.github/workflows/argo-deploy.yml
+    uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
     with:
       helm_chart_path: "helm-chart/hello-world"
+      github_user: "GitHub Actions"
+      github_email: "actions@github.com"
     needs: [build-docker]
