@@ -33,14 +33,14 @@ jobs:
         uses: actions/download-artifact@v4
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         if: env.DOCKER_HUB_USERNAME != '' && env.DOCKER_HUB_PASSWORD != ''
         with:
           username: ${{ secrets.docker_hub_username }}
           password: ${{ secrets.docker_hub_password }}
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         if: env.AWS_ASSUME_ROLE != ''
         with:
           role-to-assume: "${{ secrets.aws_assume_role }}"
@@ -48,10 +48,10 @@ jobs:
 
       - name: Login to ECR
         id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@v4
         if: env.AWS_ASSUME_ROLE != ''
-        with:
-          registry-type: public
+#        with:
+#          registry-type: public
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -94,7 +94,7 @@ jobs:
           echo ${{ inputs.version }} > image-tag.txt
 
       - name: Set Image Tag
-        run: echo "IMAGE_TAG=$(cat iamge-tag.txt)" >> $GITHUB_ENV
+        run: echo "IMAGE_TAG=$(cat image-tag.txt)" >> $GITHUB_ENV
 
       - name: Upload Docker Image Tag
         uses: actions/upload-artifact@v4
