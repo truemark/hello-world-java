@@ -9,7 +9,7 @@ image:
   repository: public.ecr.aws/truemark/helloworld-java
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 1.1.1
+  tag: 
 
 imagePullSecrets: []
 nameOverride: ""
