@@ -89,15 +89,15 @@ jobs:
           dest-password: "${{ steps.ecr-login.outputs.docker_password_public_ecr_aws }}"
           multi-arch: "all"
 
-      - name: Create Version Artifact
+      - name: Create Image Tag Artifact
         run: |
-          echo ${{ inputs.version }} > docker-tag.txt
+          echo ${{ inputs.version }} > image-tag.txt
 
-      - name: Set Docker Tag
-        run: echo "IMAGE_TAG=$(cat docker-tag.txt)" >> $GITHUB_ENV
+      - name: Set Image Tag
+        run: echo "IMAGE_TAG=$(cat iamge-tag.txt)" >> $GITHUB_ENV
 
       - name: Upload Docker Image Tag
         uses: actions/upload-artifact@v4
         with:
-          name: docker-tag
-          path: docker-tag.txt
+          name: image-tag
+          path: image-tag.txt
