@@ -32,30 +32,36 @@ jobs:
     uses: truemark/github-workflows/.github/workflows/cdk-diff.yml@argocd-demo
     with:
       environment: "stage"
+      aws_region: "us-east-1"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ build-maven ]
   deploy-stage:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: Deploy to Stage
-    uses: ./.github/workflows/deploy.yml
+    uses: truemark/github-workflows/.github/workflows/helm-deploy.yml@argocd-demo
     with:
       environment: "stage"
+      aws_region: "us-east-1"
+      helm_chart_path: "helm-chart/hello-world"
     needs: [diff-stage, build-docker]
   cdk-deploy-prod:
     name: CDK deploy to Prod
     uses: truemark/github-workflows/.github/workflows/cdk-deploy.yml@argocd-demo
     with:
       environment: "prod"
+      aws_region: "us-east-1"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [diff-stage, build-docker]
   eks-deploy-prod:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: Deploy to Prod
-    uses: ./.github/workflows/deploy.yml
+    uses: truemark/github-workflows/.github/workflows/helm-deploy.yml@argocd-demo
     with:
       environment: "prod"
+      aws_region: "us-east-1"
+      helm_chart_path: "helm-chart/hello-world"
     needs: [cdk-deploy-prod]
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
