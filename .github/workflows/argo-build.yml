@@ -18,7 +18,7 @@ jobs:
   build-docker:
     name: Build Docker
     uses: ./.github/workflows/build-docker.yml
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/') || startsWith(github.ref, 'refs/heads/argocd-demo-louie')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/argocd-demo-louie'
     with:
       version: 61.${{ github.run_number }}.${{ github.run_attempt }}
       image_name: "truemark/helloworld-java"
