@@ -31,4 +31,6 @@ jobs:
     if: github.ref == 'refs/heads/argocd-demo-louie'
     name: Deploy using ArgoCD
     uses: ./.github/workflows/argo-deploy.yml
+    with:
+      helm_chart_path: "helm-chart/hello-world"
     needs: [build-docker]
