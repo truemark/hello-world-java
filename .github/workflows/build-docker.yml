@@ -50,8 +50,8 @@ jobs:
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
         if: env.AWS_ASSUME_ROLE != ''
-#        with:
-#          registry-type: public
+        with:
+          registry-type: public
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
