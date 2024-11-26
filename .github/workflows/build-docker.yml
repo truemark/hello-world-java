@@ -92,6 +92,7 @@ jobs:
       - name: Create Version Artifact
         run: |
           echo ${{ inputs.version }} > docker-version.txt
+          echo "IMAGE_TAG=$(cat docker-version.txt)" >> $GITHUB_ENV
 
       - name: Set Docker Version
         run: echo "TAG=$(cat docker-version.txt)" >> $GITHUB_ENV
