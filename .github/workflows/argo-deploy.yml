@@ -28,7 +28,7 @@ jobs:
 
       - name: Update Tag in values.yaml
         run: |
-          sed -i "s/^  tag: .*/  tag: ${IMAGE_TAG}/" helm-chart/hello-world/values.yaml
+          sed -i "s/^  tag: .*/  tag: ${IMAGE_TAG}/" helm-chart/hello-world/values.yaml;
           sed -i "s/^  appVersion: .*/  appVersion: \"${IMAGE_TAG}\"/" helm-chart/hello-world/Chart.yaml
 
       - name: Push Updates to values.yaml
