@@ -32,5 +32,3 @@ jobs:
     name: Deploy using ArgoCD
     uses: ./.github/workflows/argo-deploy.yml
     needs: [build-docker]
-    with:
-      image_tag: ${{ needs.build-docker.outputs.IMAGE_TAG }}
