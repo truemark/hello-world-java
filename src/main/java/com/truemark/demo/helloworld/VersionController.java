@@ -1,8 +1,6 @@
 package com.truemark.demo.helloworld;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -10,15 +8,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class VersionController {
 
     @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
     public static class Version {
         private String version;
+
+        public Version() {}
+
+        public Version(String version) {
+            this.version = version;
+        }
     }
 
     @RequestMapping("/version")
     public Object version() {
-        return new Version(getClass().getPackage().getImplementationVersion());
+        String version = getClass().getPackage().getImplementationVersion();
+        if (version == null) {
+            version = "Unknown";
+        }
+        return new Version(version);
     }
-
 }
