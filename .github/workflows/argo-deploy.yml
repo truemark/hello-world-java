@@ -28,8 +28,11 @@ jobs:
 
       - name: Update Tag in values.yaml
         run: |
-          sed -i "s/^  tag: .*/  tag: ${IMAGE_TAG}/" ${{ inputs.helm_chart_path }}/values.yaml;
-          sed -i "s/^  appVersion: .*/  appVersion: \"${IMAGE_TAG}\"/" ${{ inputs.helm_chart_path }}/Chart.yaml
+          sed -i "s/^  tag: .*/  tag: ${IMAGE_TAG}/" ${{ inputs.helm_chart_path }}/values.yaml
+
+      - name: Update Tag in Chart.yaml
+        run: |
+          sed -i "s/^appVersion: .*/appVersion: \"${IMAGE_TAG}\"/" ${{ inputs.helm_chart_path }}/Chart.yaml
 
       - name: Push Updates to values.yaml
         run: |
