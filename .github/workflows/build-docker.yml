@@ -23,7 +23,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      IMAGE_TAG: ${{ steps.set-image-tag.outputs.image_tag }}
+      IMAGE_TAG: ${{ steps.set-image-tag.outputs.IMAGE_TAG }}
     env:
       AWS_ASSUME_ROLE: ${{ secrets.aws_assume_role }}
       DOCKER_HUB_USERNAME: ${{ secrets.docker_hub_username }}
@@ -96,6 +96,7 @@ jobs:
           echo ${{ inputs.version }} > docker-tag.txt
 
       - name: Set Docker Tag
+        id: set-image-tag
         run: echo "IMAGE_TAG=$(cat docker-tag.txt)" >> $GITHUB_ENV
 
       - name: Upload Docker Image Tag
