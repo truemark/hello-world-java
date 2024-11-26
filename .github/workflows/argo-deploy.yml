@@ -24,12 +24,9 @@ jobs:
           sudo wget -q https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
           sudo chmod +x /usr/local/bin/yq
 
-      - name: List files
-        run: ls -la
-
       - name: Update Tag in values.yaml
         run: |
-          yq eval ".image.tag = \"$IMAGE_TAG\"" -i  helm-chart/values.yaml
+          yq eval ".image.tag = \"$IMAGE_TAG\"" -i  helm-chart/hello-world/values.yaml
 
       - name: Push Updates to values.yaml
         run: |
