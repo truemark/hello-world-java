@@ -91,14 +91,13 @@ jobs:
 
       - name: Create Version Artifact
         run: |
-          echo ${{ inputs.version }} > docker-version.txt
-          echo "IMAGE_TAG=$(cat docker-version.txt)" >> $GITHUB_ENV
+          echo ${{ inputs.version }} > docker-tag.txt
 
-      - name: Set Docker Version
-        run: echo "TAG=$(cat docker-version.txt)" >> $GITHUB_ENV
+      - name: Set Docker Tag
+        run: echo "IMAGE_TAG=$(cat docker-tag.txt)" >> $GITHUB_ENV
 
       - name: Upload Docker Image Tag
         uses: actions/upload-artifact@v4
         with:
-          name: docker-version
-          path: docker-version.txt
+          name: docker-tag
+          path: docker-tag.txt

@@ -13,20 +13,20 @@ jobs:
 #      - name: Download Artifact
 #        uses: actions/download-artifact@v4
 #        with:
-#          name: docker-version
-#
+#          name: docker-tag
+
 #      - name: Set New Tag
 #        id: new-tag
-#        run: echo "TAG=$(cat docker-version.txt)" >> $GITHUB_ENV
+#        run: echo "TAG=$(cat docker-tag.txt)" >> $GITHUB_ENV
 
-      - name: Install yq
-        run: |
-          sudo wget -q https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
-          sudo chmod +x /usr/local/bin/yq
+#      - name: Install yq
+#        run: |
+#          sudo wget -q https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+#          sudo chmod +x /usr/local/bin/yq
 
       - name: Update Tag in values.yaml
         run: |
-          yq eval ".image.tag = \"$IMAGE_TAG\"" -i  helm-chart/hello-world/values.yaml
+          sed -i "s/^  tag: .*/  tag: ${IMAGE_TAG}/" helm-chart/hello-world/values.yaml
 
       - name: Push Updates to values.yaml
         run: |
