@@ -21,15 +21,15 @@ jobs:
 
       - name: Install yq
         run: |
-          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+          sudo wget -q https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
           sudo chmod +x /usr/local/bin/yq
 
       - name: Update Tag in values.yaml
         run: |
           cd helm-chart/hello-world
-          yq eval ".image.tag = env(TAG)" -i values.yaml
+          yq eval ".image.tag = env(IMAGE_TAG)" -i values.yaml
         env:
-          TAG: ${{ env.TAG }}
+          TAG: ${{ env.IMAGE_TAG }}
 
       - name: Push Updates to values.yaml
         run: |
