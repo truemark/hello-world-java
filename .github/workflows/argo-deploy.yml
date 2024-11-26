@@ -19,7 +19,7 @@ jobs:
       - name: Update Tag in values.yaml
         run: |
           cd helm-chart/hello-world
-          yq eval ".image.tag = ${{ env.TAG }}" -i values.yaml
+          yq eval ".image.tag = env(TAG)" -i values.yaml
         env:
           TAG: ${{ env.TAG }}
       - name: Push Updates to values.yaml
