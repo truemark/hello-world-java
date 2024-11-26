@@ -2,6 +2,11 @@ name: ArgoCD Deployment
 
 on:
   workflow_call:
+    inputs:
+      image_tag:
+        description: "Docker image tag"
+        required: true
+        type: string
 
 jobs:
   deploy:

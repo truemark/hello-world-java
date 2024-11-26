@@ -26,10 +26,13 @@ jobs:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
       docker_hub_username: ${{ secrets.DOCKER_HUB_USERNAME }}
       docker_hub_password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+    outputs:
+      IMAGE_TAG: ${{ steps.build-docker.outputs.IMAGE_TAG }}
     needs: [build-maven]
   eks-deploy-prod:
     if: github.ref == 'refs/heads/argocd-demo-louie'
     name: Deploy using ArgoCD
     uses: ./.github/workflows/argo-deploy.yml
     needs: [build-docker]
-    secrets: inherit
+    with:
+      image_tag: ${{ needs.build-docker.outputs.IMAGE_TAG }}
