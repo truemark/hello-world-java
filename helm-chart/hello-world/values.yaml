@@ -9,7 +9,7 @@ image:
   repository: public.ecr.aws/truemark/helloworld-java
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 61.44.1
+  tag: 1.0.0
 
 imagePullSecrets: []
 nameOverride: ""
@@ -17,7 +17,7 @@ fullnameOverride: "hello-world"
 
 env:
   - name: MESSAGE
-    value: "With Great Power Comes Great Responsibility"
+    value: "Hello Universe!"
 
 serviceAccount:
   # Specifies whether a service account should be created
