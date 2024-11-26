@@ -4,6 +4,8 @@
 
 replicaCount: 1
 
+# Sets the number of old replica sets to keep in Argo.
+revisionHistoryLimit: 3
 
 image:
   repository: public.ecr.aws/truemark/helloworld-java
