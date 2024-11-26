@@ -17,7 +17,7 @@ fullnameOverride: "hello-world"
 
 env:
   - name: MESSAGE
-    value: "Don't forget to pull the updates."
+    value: "I did... I did pull the updates!"
 
 serviceAccount:
   # Specifies whether a service account should be created
