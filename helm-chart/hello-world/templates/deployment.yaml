@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "truemark.labels" . | nindent 4 }}
 spec:
-  revisionHistoryLimit: {{ .Values.revisionHistoryLimit | default 5 }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit | default 10 }}
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
