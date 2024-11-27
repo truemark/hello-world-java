@@ -14,7 +14,9 @@ spec:
       {{- include "truemark.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
+      {{- range $key, $value := .Values.podAnnotations }}
+      {{ $key }}: {{ $value | replace "POD_NAME" "$(POD_NAME)" }}
+      {{- end }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
