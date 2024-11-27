@@ -1,10 +1,7 @@
 name: ArgoCD Demo
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - argocd-demo-louie
+  workflow_call:
 
 permissions:
   id-token: write
