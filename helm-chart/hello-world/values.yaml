@@ -32,7 +32,7 @@ serviceAccount:
   name: ""
 
 podAnnotations:
-  link.argocd.argoproj.io/external-link: https://hello.louie.truemark.io/POD_NAME
+  link.argocd.argoproj.io/external-link: https://hello.louie.truemark.io
 
 podSecurityContext: {}
   # fsGroup: 2000
