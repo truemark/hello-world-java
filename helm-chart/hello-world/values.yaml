@@ -20,7 +20,7 @@ fullnameOverride: "hello-world"
 
 env:
   - name: MESSAGE
-    value: "Hello Louie!"
+    value: "Welcome to the ArgoCD Demo!"
 
 serviceAccount:
   # Specifies whether a service account should be created
