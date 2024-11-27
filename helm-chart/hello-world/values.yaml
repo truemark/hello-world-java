@@ -20,7 +20,7 @@ fullnameOverride: "hello-world"
 
 env:
   - name: MESSAGE
-    value: "Hello Universe!"
+    value: "Hello Louie!"
 
 serviceAccount:
   # Specifies whether a service account should be created
