@@ -46,55 +46,16 @@ jobs:
           role-to-assume: "${{ secrets.aws_assume_role }}"
           aws-region: "us-east-1"
 
-#      - name: Login to ECR
-#        id: ecr-login
-#        uses: aws-actions/amazon-ecr-login@v2
-#        if: env.AWS_ASSUME_ROLE != ''
-#        with:
-#          registry-type: public
-#
-#      - name: Set up QEMU
-#        uses: docker/setup-qemu-action@v3
-#      - name: Set up Docker Buildx
-#        uses: docker/setup-buildx-action@v3
-#      - name: Build Docker
-#        run: |
-#          docker buildx build \
-#            --push \
-#            --platform linux/arm64,linux/amd64 \
-#            -f Dockerfile \
-#            -t ${{ inputs.image_name }}:${{ inputs.version }} \
-#            -t ${{ inputs.image_name }}:latest \
-#            .
-#      - name: Copy beta to ECR
-#        uses: truemark/skopeo-copy-action@v1
-#        if: env.AWS_ASSUME_ROLE != ''
-#        with:
-#          src-image: "docker://${{ inputs.image_name }}:${{ inputs.version }}"
-#          dest-image: "docker://public.ecr.aws/${{ inputs.image_name }}:${{ inputs.version }}"
-#          src-username: "${{ secrets.docker_hub_username }}"
-#          src-password: "${{ secrets.docker_hub_password }}"
-#          dest-username: "${{ steps.ecr-login.outputs.docker_username_public_ecr_aws }}"
-#          dest-password: "${{ steps.ecr-login.outputs.docker_password_public_ecr_aws }}"
-#          multi-arch: "all"
-#
-#      - name: Copy latest to ECR
-#        uses: truemark/skopeo-copy-action@v1
-#        with:
-#          src-image: "docker://${{ inputs.image_name }}:latest"
-#          dest-image: "docker://public.ecr.aws/${{ inputs.image_name }}:latest"
-#          src-username: "${{ secrets.docker_hub_username }}"
-#          src-password: "${{ secrets.docker_hub_password }}"
-#          dest-username: "${{ steps.ecr-login.outputs.docker_username_public_ecr_aws }}"
-#          dest-password: "${{ steps.ecr-login.outputs.docker_password_public_ecr_aws }}"
-#          multi-arch: "all"
-#
-#      - name: Create Version Artifact
-#        run: |
-#          echo ${{ inputs.version }} > docker-version.txt
-#
-#      - name: Upload Docker Image Tag
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: docker-version
-#          path: docker-version.txt
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build Docker
+        run: |
+          docker buildx build \
+            --push \
+            --platform linux/arm64,linux/amd64 \
+            -f Dockerfile \
+            -t ${{ inputs.image_name }}:${{ inputs.version }} \
+            -t ${{ inputs.image_name }}:latest \
+            .
