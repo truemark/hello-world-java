@@ -23,3 +23,9 @@ jobs:
       docker_hub_username: ${{ secrets.DOCKER_HUB_USERNAME }}
       docker_hub_password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
     needs: [build-maven]
+  make_release:
+    name: Prepare for releaes
+    uses: ./.github/workflows/releases.yml
+    with:
+      environment: "dev"
+
