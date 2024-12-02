@@ -22,7 +22,7 @@ deployment:
       effect: "NoSchedule"
   image:
     repository: pijain/helloworld-java
-    tag: 61.14.1
+    tag: 61.15.1
     pullPolicy: IfNotPresent
   probes:
     startupProbe:
