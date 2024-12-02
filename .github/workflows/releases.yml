@@ -12,8 +12,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.PAT }}
 
       - name: Install yq
         run: |
@@ -32,13 +30,17 @@ jobs:
         run: |
           yq eval '.deployment.image.tag = "61.${{ github.run_number }}.${{ github.run_attempt }}"' -i k8s/values.yaml
 
-      - name: Commit and Push Changes
+      - name: Configure Git for PAT authentication
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://${{ secrets.PAT }}@github.com/${{ github.repository }}.git
+
+      - name: Commit Changes
+        run: |
           git add k8s/values.yaml
           git commit -m "Update image tag for ${{ inputs.environment }} release"
-          git push origin main
+          git push origin HEAD
 
       - name: Force Update Tag
         run: |
