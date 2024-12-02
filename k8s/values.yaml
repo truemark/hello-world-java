@@ -3506,13 +3506,13 @@ grafanaDashboard:
       }
 istio:
   virtualServices:
-    enabled: false
+    enabled: true
     spec:
       default-route:
         hosts:
-          - hello.test.pijain.systems
+          - hello.stage.truemark.io
         gateways:
-          - istio-system/external-gateway
+          - istio-ingress/external
         http:
           - name: hello-world
             route:
