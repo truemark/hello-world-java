@@ -26,6 +26,7 @@ jobs:
   make_release:
     name: Prepare for releaes
     uses: ./.github/workflows/releases.yml
+    needs: [build-docker]
     with:
       environment: "dev"
 
