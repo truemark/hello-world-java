@@ -44,8 +44,8 @@ jobs:
 
       - name: Force Update Tag
         run: |
-          git tag -f ${GITHUB_REPOSITORY}-release-${{ inputs.environment }}
-          git push origin --force ${GITHUB_REPOSITORY}-release-${{ inputs.environment }}
+          git tag -f ${{ inputs.environment }}
+          git push origin --force ${{ inputs.environment }}
 
       - name: Create Release Tag for Run
         run: |
