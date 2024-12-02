@@ -21,7 +21,7 @@ deployment:
       value: "truemark-arm64"
       effect: "NoSchedule"
   image:
-    repository: pijain/helloworld
+    repository: pijain/helloworld-java
     tag: 61.11.1
     pullPolicy: IfNotPresent
   probes:
