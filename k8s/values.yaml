@@ -1,6 +1,5 @@
 nameOverride: "hello-world"
 componentOverride: "backend"
-
 ##########################################################
 # Deployment
 ##########################################################
@@ -23,7 +22,7 @@ deployment:
       effect: "NoSchedule"
   image:
     repository: pijain/helloworld
-    tag: 0.0.1
+    tag: 61.9.1
     pullPolicy: IfNotPresent
   probes:
     startupProbe:
@@ -32,7 +31,6 @@ deployment:
       httpGet:
         path: '/actuator/health'
         port: 9000
-
     readinessProbe:
       failureThreshold: 3
       periodSeconds: 10
@@ -42,7 +40,6 @@ deployment:
       httpGet:
         path: '/actuator/health/readiness'
         port: 9000
-
     livenessProbe:
       failureThreshold: 3
       periodSeconds: 10
@@ -52,7 +49,6 @@ deployment:
       httpGet:
         path: '/actuator/health/liveness'
         port: 9000
-
   resources:
     limits:
       memory: 256Mi
@@ -60,7 +56,6 @@ deployment:
     requests:
       memory: 128Mi
       cpu: 0.1
-
   ports:
     http:
       containerPort: 8080
@@ -72,36 +67,30 @@ deployment:
       protocol: TCP
       port: 9000
       exposed: true
-
 ##########################################################
 # Service object for servicing pods
 ##########################################################
 service:
   enabled: true
   type: ClusterIP
-
 ##########################################################
 # Role Based Access Control (RBAC)
 ##########################################################
 rbac:
   enabled: true
-
   # Service Account to use by pods
   serviceAccount:
     enabled: true
-
 ##########################################################
 # Additional ConfigMaps
 ##########################################################
 configMap:
   enabled: false
-
 ##########################################################
 # Additional Secrets
 ##########################################################
 secret:
   enabled: false
-
 ##########################################################
 # Service Monitor to collect Prometheus metrices
 ##########################################################
@@ -114,7 +103,6 @@ serviceMonitor:
     - interval: 5s
       path: /actuator/prometheus
       port: http
-
 ##########################################################
 # HPA - Horizontal Pod Autoscaling
 ##########################################################
@@ -138,7 +126,6 @@ autoscaling:
         target:
           type: Utilization
           averageUtilization: 60
-
 ##########################################################
 # PrometheusRule object for defining application
 # alerting rules
@@ -147,17 +134,16 @@ prometheusRule:
   enabled: false
   additionalLabels:
   groups: []
-    # - name: example-app-uptime
-    #   rules:
-    #     - alert: ExampleAppDown
-    #       annotations:
-    #         message: >-
-    #           The Example App is Down (Test Alert)
-    #       expr: up{namespace="test-app"} == 0
-    #       for: 1m
-    #       labels:
+  # - name: example-app-uptime
+  #   rules:
+  #     - alert: ExampleAppDown
+  #       annotations:
+  #         message: >-
+  #           The Example App is Down (Test Alert)
+  #       expr: up{namespace="test-app"} == 0
+  #       for: 1m
+  #       labels:
   #         severity: critical
-
 ##########################################################
 # Pod disruption budget - PDB
 ##########################################################
@@ -3518,7 +3504,6 @@ grafanaDashboard:
         "version": 11,
         "weekStart": ""
       }
-
 istio:
   virtualServices:
     enabled: false
