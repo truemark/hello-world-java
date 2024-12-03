@@ -1,0 +1,91 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        type: string
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        run: |
+          echo "Installing kubectl..."
+          KUBECTL_VERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
+          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$KUBECTL_VERSION/bin/linux/amd64/kubectl"
+          chmod +x ./kubectl
+          sudo mv ./kubectl /usr/local/bin/kubectl
+          echo "kubectl installed successfully."
+
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+
+      - name: Prepare Release
+        run: |
+          echo "Preparing release for environment ${{ inputs.environment }}"
+          echo "Release version: ${{ github.run_number }}"
+          echo "Release attempt: ${{ github.run_attempt }}"
+          echo "Release environment: ${{ inputs.environment }}"
+          echo "Release date: $(date)"
+
+      - name: Update image tag in values.yaml
+        run: |
+          yq eval '.deployment.image.tag = "61.${{ github.run_number }}.${{ github.run_attempt }}"' -i k8s/values.yaml
+
+      - name: Configure Git for PAT authentication
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://${{ secrets.PAT }}@github.com/${{ github.repository }}.git
+
+      - name: Commit Changes
+        run: |
+          git add k8s/values.yaml
+          git commit -m "Update image tag for ${{ inputs.environment }} release"
+          git push origin HEAD
+
+      - name: Force Update Tag
+        run: |
+          git tag -f ${{ inputs.environment }}
+          git push origin --force ${{ inputs.environment }}
+
+      - name: Poll application status
+        env:
+          APP_NAME: hello-world
+        run: |
+          aws eks update-kubeconfig --region us-east-2 --name truemark-ek
+          echo "Polling application status for $APP_NAME..."
+          INITIAL_CHECK_DONE=false
+          while true; do
+            STATUS=$(kubectl get -n argocd application/$APP_NAME -o jsonpath='{.status.sync.status}')
+            HEALTH=$(kubectl get -n argocd application/$APP_NAME -o jsonpath='{.status.health.status}')
+            echo "$(date): Sync status: $STATUS, Health status: $HEALTH"
+          
+            # Ignore the initial Healthy/Synced state
+            if [[ "$INITIAL_CHECK_DONE" == "false" ]]; then
+              echo "Ignoring initial status: Sync=$STATUS, Health=$HEALTH"
+              if [[ "$STATUS" != "Synced" || "$HEALTH" != "Healthy" ]]; then
+                INITIAL_CHECK_DONE=true
+              fi
+            else
+              # Check for successful sync and healthy state
+              if [[ "$STATUS" == "Synced" && "$HEALTH" == "Healthy" ]]; then
+                echo "Application $APP_NAME successfully synced and healthy."
+                break
+              fi
+            fi
+          
+            # Print recent events for the application
+            echo "Recent events for $APP_NAME:"
+            kubectl get -n argocd events --field-selector involvedObject.name=$APP_NAME --sort-by='.metadata.creationTimestamp' -o wide | tail -n 5
+          
+            # Wait for 10 seconds before polling again
+            sleep 10
+          done
