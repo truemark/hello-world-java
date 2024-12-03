@@ -89,10 +89,8 @@ jobs:
               fi
             fi
           
-            # Print recent events for the application
-            echo "Recent events for $APP_NAME:"
-            kubectl get -n argocd events --field-selector involvedObject.name=$APP_NAME --sort-by='.metadata.creationTimestamp' -o wide | tail -n 5
-          
             # Wait for 10 seconds before polling again
             sleep 10
           done
+          echo "Recent events for $APP_NAME:"
+          kubectl get -n argocd events --field-selector involvedObject.name=$APP_NAME --sort-by='.metadata.creationTimestamp' -o wide | tail -n 5
