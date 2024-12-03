@@ -22,7 +22,7 @@ deployment:
       effect: "NoSchedule"
   image:
     repository: truemark/helloworld-java
-    tag: 61.132.1
+    tag: 61.133.1
     pullPolicy: IfNotPresent
   probes:
     startupProbe:
