@@ -67,7 +67,7 @@ jobs:
         env:
           APP_NAME: hello-world
         run: |
-          aws eks update-kubeconfig --region us-east-2 --name truemark-ek
+          aws eks update-kubeconfig --region us-east-2 --name ${{ vars.CLUSTER_NAME }}
           echo "Polling application status for $APP_NAME..."
           INITIAL_CHECK_DONE=false
           while true; do
