@@ -83,7 +83,7 @@ jobs:
     name: EKS deploy to Prod
     uses: ./.github/workflows/eks-deploy.yml
     with:
-      environment: "prod"
+      environment: "stage"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ cdk-deploy-prod ]
