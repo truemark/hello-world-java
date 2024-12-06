@@ -1,3 +1,4 @@
+name: CDK Deployment
 on:
   workflow_call:
     secrets:
