@@ -52,8 +52,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: truemark/k8s-deployments
+          ref: main
           path: k8s-deployments
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update image tag in values.yaml
         run: |
