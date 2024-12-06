@@ -90,6 +90,6 @@ jobs:
       environment: "prod"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
-      app-id: ${{ secrets.RELEASE_BOT_KEY }}
-      private-key: ${{ secrets.RELEASE_BOT_ID }}
+      app-id: ${{ secrets.RELEASE_BOT_ID }}
+      private-key: ${{ secrets.RELEASE_BOT_KEY }}
     needs: [ build-docker ]
