@@ -55,7 +55,7 @@ jobs:
 
   eks-deploy-stage:
     if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd-louie'
-    name: EKS deploy to Stage
+    name: ArgoCD deploy to Stage
     uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
     with:
       environment: "stage"
