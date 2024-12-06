@@ -54,7 +54,7 @@ jobs:
       - name: Checkout tools repo
         uses: actions/checkout@v4
         with:
-          repository: d3vb0ox/k8s-deployments
+          repository: truemark/k8s-deployments
           ssh-key: ${{ secrets.K8S_DEPLOY_KEY }}
           path: k8s-deployments
 
