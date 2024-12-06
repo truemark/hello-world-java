@@ -57,7 +57,9 @@ jobs:
     with:
       environment: "stage"
     secrets:
-      PAT: ${{ secrets.PAT }}
+      app-id: ${{ secrets.RELEASE_BOT_KEY }}
+      private-key: ${{ secrets.RELEASE_BOT_ID }}
+
     needs: [ build-docker ]
 
   cdk-diff-prod:
