@@ -11,7 +11,7 @@ permissions:
 jobs:
   build-maven:
     name: Build Maven
-    uses: ./.github/workflows/build-maven.yml
+    uses: truemark/github-workflows/.github/workflows/build-maven.yml@argocd-demo
     with:
       version: 61.${{ github.run_number }}.${{ github.run_attempt }}
       java_version: 21
@@ -19,11 +19,12 @@ jobs:
 
   build-docker:
     name: Build Docker
-    uses: ./.github/workflows/build-docker.yml
+    uses: truemark/github-workflows/.github/workflows/build-docker.yml@argocd-demo
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' ||startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
     with:
       version: 61.${{ github.run_number }}.${{ github.run_attempt }}
       image_name: "truemark/helloworld-java"
+      aws_region: ${{ secrets.AWS_REGION }}
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
       docker_hub_username: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -33,9 +34,10 @@ jobs:
   cdk-diff-stage:
     if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: CDK diff to Stage
-    uses: ./.github/workflows/cdk-diff.yml
+    uses: truemark/github-workflows/.github/workflows/cdk-diff.yml@argocd-demo
     with:
       environment: "stage"
+      aws_region: ${{ secrets.AWS_REGION }}
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ build-maven, build-docker ]
@@ -43,9 +45,10 @@ jobs:
   cdk-deploy-stage:
     if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: CDK deploy to Stage
-    uses: ./.github/workflows/cdk-deploy.yml
+    uses: truemark/github-workflows/.github/workflows/cdk-deploy.yml@argocd-demo
     with:
       environment: "stage"
+      aws_region: ${{ secrets.AWS_REGION }}
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ cdk-diff-stage ]
@@ -53,9 +56,10 @@ jobs:
   eks-deploy-stage:
     if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
     name: EKS deploy to Stage
-    uses: ./.github/workflows/eks-deploy.yml
+    uses: truemark/github-workflows/.github/workflows/eks-deploy.yml@argocd-demo
     with:
       environment: "stage"
+      aws_region: ${{ secrets.AWS_REGION }}
     secrets:
       app-id: ${{ secrets.RELEASE_BOT_ID }}
       private-key: ${{ secrets.RELEASE_BOT_KEY }}
@@ -65,9 +69,10 @@ jobs:
   cdk-diff-prod:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: CDK diff to Prod
-    uses: ./.github/workflows/cdk-diff.yml
+    uses: truemark/github-workflows/.github/workflows/cdk-diff.yml@argocd-demo
     with:
       environment: "prod"
+      aws_region: ${{ secrets.AWS_REGION }}
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ build-maven, build-docker ]
@@ -75,9 +80,10 @@ jobs:
   cdk-deploy-prod:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: CDK deploy to Prod
-    uses: ./.github/workflows/cdk-deploy.yml
+    uses: truemark/github-workflows/.github/workflows/cdk-deploy.yml@argocd-demo
     with:
       environment: "prod"
+      aws_region: ${{ secrets.AWS_REGION }}
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ cdk-diff-prod ]
@@ -85,9 +91,10 @@ jobs:
   eks-deploy-prod:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: EKS deploy to Prod
-    uses: ./.github/workflows/eks-deploy.yml
+    uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
     with:
       environment: "prod"
+      aws_region: ${{ secrets.AWS_REGION }}
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
       app-id: ${{ secrets.RELEASE_BOT_ID }}
