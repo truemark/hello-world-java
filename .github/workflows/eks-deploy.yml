@@ -67,11 +67,11 @@ jobs:
           IMAGE_TAG: 61.31.5
         run: |
           cd k8s-deployments
-          yq eval ".deployment.image.tag = \"$IMAGE_TAG\"" -i applications/hello-world/stage.yaml
+          yq eval ".deployment.image.tag = \"$IMAGE_TAG\"" -i applications/hello-world/${{ inputs.environment }}.yaml
           echo "Updated values.yaml with IMAGE_TAG=$IMAGE_TAG."
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add applications/hello-world/stage.yaml
+          git add applications/hello-world/${{ inputs.environment }}.yaml
           git commit -m "Update image tag to $IMAGE_TAG"
           git push origin main
 
