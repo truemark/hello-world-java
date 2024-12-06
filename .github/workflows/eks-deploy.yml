@@ -52,8 +52,14 @@ jobs:
           AWS_REGION: "us-east-2"
 
       - name: Helm Deploy
-        uses: koslib/helm-eks-action@v1.28.0
-        env:
-          KUBE_CONFIG_DATA: ${{ env.KUBE_CONFIG_DATA }}
+        uses: truemark/kubectl-action@converting-to-typescript
         with:
-          command: helm upgrade --install -n hello-world --create-namespace --wait --atomic --set image.tag=$IMAGE_TAG -f helm-chart/hello-world/values.yaml hello-world helm-chart/hello-world
+          helm-enabled: 'true'
+          command: 'helm upgrade --install -n hello-world --create-namespace --wait --atomic --set image.tag=$IMAGE_TAG -f helm-chart/hello-world/values.yaml hello-world helm-chart/hello-world'
+
+#      - name: Helm Deploy
+#        uses: koslib/helm-eks-action@v1.28.0
+#        env:
+#          KUBE_CONFIG_DATA: ${{ env.KUBE_CONFIG_DATA }}
+#        with:
+#          command: helm upgrade --install -n hello-world --create-namespace --wait --atomic --set image.tag=$IMAGE_TAG -f helm-chart/hello-world/values.yaml hello-world helm-chart/hello-world
