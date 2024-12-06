@@ -24,7 +24,7 @@ jobs:
     with:
       version: 61.${{ github.run_number }}.${{ github.run_attempt }}
       image_name: "truemark/helloworld-java"
-      aws_region: "us-west-2"
+      aws_region: "us-east-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
       docker_hub_username: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -37,7 +37,7 @@ jobs:
     uses: truemark/github-workflows/.github/workflows/cdk-diff.yml@argocd-demo
     with:
       environment: "stage"
-      aws_region: "us-west-2"
+      aws_region: "us-east-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ build-maven, build-docker ]
@@ -48,7 +48,7 @@ jobs:
     uses: truemark/github-workflows/.github/workflows/cdk-deploy.yml@argocd-demo
     with:
       environment: "stage"
-      aws_region: "us-west-2"
+      aws_region: "us-east-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ cdk-diff-stage ]
@@ -71,7 +71,7 @@ jobs:
     uses: truemark/github-workflows/.github/workflows/cdk-diff.yml@argocd-demo
     with:
       environment: "prod"
-      aws_region: "us-west-2"
+      aws_region: "us-east-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ build-maven, build-docker ]
@@ -82,7 +82,7 @@ jobs:
     uses: truemark/github-workflows/.github/workflows/cdk-deploy.yml@argocd-demo
     with:
       environment: "prod"
-      aws_region: "us-west-2"
+      aws_region: "us-east-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ cdk-diff-prod ]
