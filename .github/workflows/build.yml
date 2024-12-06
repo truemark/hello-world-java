@@ -56,7 +56,7 @@ jobs:
     uses: ./.github/workflows/eks-deploy.yml
     with:
       environment: "stage"
-    needs: [ cdk-deploy-stage ]
+    needs: [ build-docker ]
 
   cdk-diff-prod:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
@@ -83,7 +83,7 @@ jobs:
     name: EKS deploy to Prod
     uses: ./.github/workflows/eks-deploy.yml
     with:
-      environment: "stage"
+      environment: "prod"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ cdk-deploy-prod ]
