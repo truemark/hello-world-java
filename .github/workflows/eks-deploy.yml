@@ -63,8 +63,6 @@ jobs:
           echo "Updated values.yaml with IMAGE_TAG=$IMAGE_TAG."
 
       - name: Commit and Push Changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd k8s-deployments
           git config --global user.name "github-actions[bot]"
