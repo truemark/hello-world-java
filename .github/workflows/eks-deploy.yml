@@ -7,7 +7,7 @@ on:
       app-id:
         description: "App Id"
         required: true
-      private_key:
+      private-key:
         description: "Private Key"
         required: true
     inputs:
