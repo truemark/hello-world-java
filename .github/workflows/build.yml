@@ -56,6 +56,8 @@ jobs:
     uses: ./.github/workflows/eks-deploy.yml
     with:
       environment: "stage"
+    secrets:
+      PAT: ${{ secrets.PAT }}
     needs: [ build-docker ]
 
   cdk-diff-prod:
