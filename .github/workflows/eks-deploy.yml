@@ -22,6 +22,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: image-tag
+          path: .
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
