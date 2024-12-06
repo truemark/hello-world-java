@@ -86,4 +86,4 @@ jobs:
       environment: "prod"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
-    needs: [ cdk-deploy-prod ]
+    needs: [ build-docker ]
