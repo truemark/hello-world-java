@@ -48,23 +48,14 @@ jobs:
           sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
           sudo chmod +x /usr/bin/yq
 
-#      - name: Checkout tools repo
-#        uses: actions/checkout@v4
-#        with:
-#          repository: truemark/k8s-deployments
-#          ssh-key: ${{ secrets.TEMP }}
-#          path: k8s-deployments
-
-      - name: Setup SSH
-        uses: MrSquaare/ssh-setup-action@v3
+      - name: Checkout tools repo
+        uses: actions/checkout@v4
         with:
-          host: github.com
-          private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - name: Clone repository
-        run: git clone git@github.com:truemark/k8s-deployments.git
+          repository: d3vb0ox/k8s-deployments
+          token: ${{ secrets.PAT }}
+          path: k8s-deployments
+
       - name: Update image tag in values.yaml
-        env:
-          IMAGE_TAG: 61.31.5
         run: |
           cd k8s-deployments
           yq eval ".deployment.image.tag = \"$IMAGE_TAG\"" -i applications/hello-world/${{ inputs.environment }}.yaml
