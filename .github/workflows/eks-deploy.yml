@@ -1,5 +1,6 @@
 name: EKS Helmfile Deployment
 on:
+  workflow_call:
   workflow_run:
     workflows: [ "Build Docker" ]
     types:
