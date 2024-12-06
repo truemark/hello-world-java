@@ -62,8 +62,7 @@ jobs:
     secrets:
       app-id: ${{ secrets.RELEASE_BOT_ID }}
       private-key: ${{ secrets.RELEASE_BOT_KEY }}
-
-    needs: [ build-docker ]
+    needs: [ cdk-deploy-stage ]
 
   cdk-diff-prod:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
@@ -74,7 +73,7 @@ jobs:
       aws_region: "us-east-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
-    needs: [ build-maven, build-docker ]
+    needs: [ eks-deploy-stage ]
 
   cdk-deploy-prod:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
@@ -97,4 +96,4 @@ jobs:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
       app-id: ${{ secrets.RELEASE_BOT_ID }}
       private-key: ${{ secrets.RELEASE_BOT_KEY }}
-    needs: [ build-docker ]
+    needs: [ cdk-deploy-prod ]
