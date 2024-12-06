@@ -54,7 +54,7 @@ jobs:
       - name: Checkout tools repo
         uses: actions/checkout@v4
         with:
-          repository: d3vb0ox/k8s-deployments
+          repository: truemark/k8s-deployments
           token: ${{ secrets.PAT }}
           path: k8s-deployments
 
@@ -68,6 +68,8 @@ jobs:
           git add applications/hello-world/${{ inputs.environment }}.yaml
           git commit -m "Update image tag to $IMAGE_TAG"
           git push origin main
+          
+      
 
 #      - name: Setup Cluster Access
 #        run: |
