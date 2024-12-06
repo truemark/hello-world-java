@@ -24,7 +24,7 @@ jobs:
     with:
       version: 61.${{ github.run_number }}.${{ github.run_attempt }}
       image_name: "truemark/helloworld-java"
-      aws_region: ${{ secrets.AWS_REGION }}
+      aws_region: "us-west-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
       docker_hub_username: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -37,7 +37,7 @@ jobs:
     uses: truemark/github-workflows/.github/workflows/cdk-diff.yml@argocd-demo
     with:
       environment: "stage"
-      aws_region: ${{ secrets.AWS_REGION }}
+      aws_region: "us-west-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ build-maven, build-docker ]
@@ -48,7 +48,7 @@ jobs:
     uses: truemark/github-workflows/.github/workflows/cdk-deploy.yml@argocd-demo
     with:
       environment: "stage"
-      aws_region: ${{ secrets.AWS_REGION }}
+      aws_region: "us-west-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ cdk-diff-stage ]
@@ -59,7 +59,7 @@ jobs:
     uses: ./.github/workflows/eks-deploy.yml
     with:
       environment: "stage"
-      aws_region: ${{ secrets.AWS_REGION }}
+      aws_region: "us-west-2"
     secrets:
       app-id: ${{ secrets.RELEASE_BOT_ID }}
       private-key: ${{ secrets.RELEASE_BOT_KEY }}
@@ -72,7 +72,7 @@ jobs:
     uses: truemark/github-workflows/.github/workflows/cdk-diff.yml@argocd-demo
     with:
       environment: "prod"
-      aws_region: ${{ secrets.AWS_REGION }}
+      aws_region: "us-west-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ build-maven, build-docker ]
@@ -83,7 +83,7 @@ jobs:
     uses: truemark/github-workflows/.github/workflows/cdk-deploy.yml@argocd-demo
     with:
       environment: "prod"
-      aws_region: ${{ secrets.AWS_REGION }}
+      aws_region: "us-west-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ cdk-diff-prod ]
@@ -94,7 +94,7 @@ jobs:
     uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
     with:
       environment: "prod"
-      aws_region: ${{ secrets.AWS_REGION }}
+      aws_region: "us-west-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
       app-id: ${{ secrets.RELEASE_BOT_ID }}
