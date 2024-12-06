@@ -94,6 +94,7 @@ jobs:
     uses: ./.github/workflows/eks-deploy.yml
     with:
       environment: "prod"
+      image_tag: ${{ needs.build-docker.outputs.image_tag }}
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
 #      app-id: ${{ secrets.RELEASE_BOT_ID }}
