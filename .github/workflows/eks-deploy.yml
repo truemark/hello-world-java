@@ -1,6 +1,9 @@
 name: EKS Helmfile Deployment
 on:
-  workflow_call:
+  workflow_run:
+    workflows: [ "Build Docker" ]
+    types:
+      - completed
     secrets:
       aws_assume_role:
         description: "AWS role to assume"
