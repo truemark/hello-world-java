@@ -88,4 +88,5 @@ jobs:
       environment: "prod"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
+      PAT: ${{ secrets.PAT }}
     needs: [ build-docker ]
