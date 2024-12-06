@@ -59,21 +59,19 @@ jobs:
         uses: MrSquaare/ssh-setup-action@v3
         with:
           host: github.com
-          private-key: ${{ secrets.TEMP }}
-
+          private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Clone repository
+        run: git clone git@github.com:truemark/k8s-deployments.git
       - name: Update image tag in values.yaml
+        env:
+          IMAGE_TAG: 61.31.5
         run: |
-          git clone git@github.com:truemark/k8s-deployments.git
           cd k8s-deployments
-          yq eval ".deployment.image.tag = \"$IMAGE_TAG\"" -i applications/hello-world/${{ inputs.environment }}.yaml
+          yq eval ".deployment.image.tag = \"$IMAGE_TAG\"" -i applications/hello-world/stage.yaml
           echo "Updated values.yaml with IMAGE_TAG=$IMAGE_TAG."
-
-      - name: Commit and Push Changes
-        run: |
-          cd k8s-deployments
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add applications/hello-world/${{ inputs.environment }}.yaml
+          git add applications/hello-world/stage.yaml
           git commit -m "Update image tag to $IMAGE_TAG"
           git push origin main
 
