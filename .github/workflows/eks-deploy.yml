@@ -4,6 +4,9 @@ on:
       aws_assume_role:
         description: "AWS role to assume"
         required: false
+      PAT:
+        description: "Personal Access Token"
+        required: true
     inputs:
       environment:
         description: "Environment to deploy to"
