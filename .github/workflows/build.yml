@@ -90,6 +90,7 @@ jobs:
   eks-deploy-prod:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: EKS deploy to Prod
+#    uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
     uses: ./.github/workflows/eks-deploy.yml
     with:
       environment: "prod"
