@@ -4,8 +4,11 @@ on:
       aws_assume_role:
         description: "AWS role to assume"
         required: false
-      PAT:
-        description: "Personal Access Token"
+      app-id:
+        description: "App Id"
+        required: true
+      private_key:
+        description: "Private Key"
         required: true
     inputs:
       environment:
