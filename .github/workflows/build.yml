@@ -20,7 +20,7 @@ jobs:
   build-docker:
     name: Build Docker
     uses: truemark/github-workflows/.github/workflows/build-docker.yml@argocd-demo
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' ||startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' ||startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd-louie'
     with:
       version: 61.${{ github.run_number }}.${{ github.run_attempt }}
       image_name: "truemark/helloworld-java"
@@ -54,7 +54,7 @@ jobs:
     needs: [ cdk-diff-stage ]
 
   eks-deploy-stage:
-    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
+    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd-louie'
     name: EKS deploy to Stage
     uses: ./.github/workflows/eks-deploy.yml
     with:
@@ -90,7 +90,7 @@ jobs:
   eks-deploy-prod:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: EKS deploy to Prod
-    uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
+    uses: ./.github/workflows/eks-deploy.yml
     with:
       environment: "prod"
     secrets:
