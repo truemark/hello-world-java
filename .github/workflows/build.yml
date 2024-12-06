@@ -56,7 +56,7 @@ jobs:
   eks-deploy-stage:
     if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
     name: EKS deploy to Stage
-    uses: truemark/github-workflows/.github/workflows/eks-deploy.yml@argocd-demo
+    uses: ./.github/workflows/eks-deploy.yml
     with:
       environment: "stage"
       aws_region: ${{ secrets.AWS_REGION }}
