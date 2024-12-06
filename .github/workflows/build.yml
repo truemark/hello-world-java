@@ -93,7 +93,6 @@ jobs:
     uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
     with:
       environment: "prod"
-      aws_region: "us-west-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
       app-id: ${{ secrets.RELEASE_BOT_ID }}
