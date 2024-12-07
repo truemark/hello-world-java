@@ -63,9 +63,14 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
-nodeSelector: {}
+nodeSelector:
+  karpenter.sh/nodepool: truemark-amd64
 
-tolerations: []
+tolerations:
+  - key: "karpenter.sh/nodepool"
+    operator: "Equal"
+    value: "truemark-amd64"
+    effect: "NoSchedule"
 
 affinity: {}
 
