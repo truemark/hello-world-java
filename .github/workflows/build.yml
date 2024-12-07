@@ -20,6 +20,7 @@ jobs:
 
   build-docker:
     name: Build Docker
+    id: build-docker
     uses: truemark/github-workflows/.github/workflows/build-docker.yml@argocd-demo
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' ||startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd-louie'
     with:
