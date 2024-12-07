@@ -61,4 +61,5 @@ jobs:
         uses: truemark/kubectl-action@converting-to-typescript
         with:
           helm-enabled: 'true'
+          helm-version: '3.10.1'
           command: 'helm upgrade --install -n hello-world --create-namespace --wait --atomic --set image.tag=$IMAGE_TAG -f helm-chart/hello-world/values.yaml hello-world helm-chart/hello-world'
