@@ -31,7 +31,7 @@ jobs:
     needs: [ build-maven ]
 
   cdk-diff-stage:
-    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
     name: CDK diff to Stage
     uses: ./.github/workflows/cdk-diff.yml
     with:
@@ -41,7 +41,7 @@ jobs:
     needs: [ build-maven, build-docker ]
 
   cdk-deploy-stage:
-    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
     name: CDK deploy to Stage
     uses: ./.github/workflows/cdk-deploy.yml
     with:
