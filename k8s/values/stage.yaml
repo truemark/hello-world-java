@@ -1,0 +1,3 @@
+deployment:
+  image:
+    tag: "61.31.5"

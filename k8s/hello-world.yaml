@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: guestbook
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    namespace: hello-world
+    name: in-cluster
+  syncPolicy:
+    automated: { }
+  sources:
+    - repoURL: git@github.com:truemark/k8s-deployments.git
+      targetRevision: main
+      ref: values
+    - repoURL: public.ecr.aws/truemark
+      targetRevision: 0.0.2
+      helm:
+        valueFiles:
+          - $values/applications/hello-world/values.yaml
+          - $values/applications/hello-world/{{environment}}.yaml
+        releaseName: hello-world
+        ignoreMissingValueFiles: true
+      chart: k8s-app

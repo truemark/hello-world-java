@@ -39,7 +39,11 @@ jobs:
         shell: bash
         run: | 
           echo "IMAGE_TAG=$(cat image-tag.txt)" >> $GITHUB_ENV
-          
+
+      - name: EKS cluster login
+        run: |
+          aws eks update-kubeconfig --region us-east-2 --name ${{ vars.CLUSTER_NAME }}
+
       - name: Install kubectl
         run: |
           echo "Installing kubectl..."
@@ -70,12 +74,24 @@ jobs:
 
       - name: Update image tag in values.yaml
         run: |
+          APP_NAME="hello-world"
+          APP_FILE="k8s/applications/hello-world.yaml"
+          VALUES_FILE="k8s/applications/hello-world/${{ inputs.environment }}.yaml"
+          ENVIRONMENT="${{ inputs.environment }}"
+          yq eval ".spec.sources[].helm.valueFiles |= map(select(. != \"\").gsub(\"{{environment}}\", \"$ENVIRONMENT\"))" -i $APP_FILE
+          echo "Checking if ArgoCD Application $APP_NAME exists..."
+          if ! kubectl get application -n argocd $APP_NAME >/dev/null 2>&1; then
+            echo "$APP_NAME not found. Applying configuration from $APP_FILE."
+            kubectl apply -f $APP_FILE
+          else
+            echo "$APP_NAME already exists. Updating values file before syncing."
+            yq eval ".deployment.image.tag = \"$IMAGE_TAG\"" -i k8s/values/${{ inputs.environment }}.yaml
+          fi
           cd k8s-deployments
-          yq eval ".deployment.image.tag = \"$IMAGE_TAG\"" -i applications/hello-world/${{ inputs.environment }}.yaml
-          echo "Updated values.yaml with IMAGE_TAG=$IMAGE_TAG."
+          cp -r k8s/values/*.yaml applications/hello-world/
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add applications/hello-world/${{ inputs.environment }}.yaml
+          git add applications/hello-world/
           git commit -m "Update image tag to $IMAGE_TAG"
           git push origin main
 
@@ -83,7 +99,6 @@ jobs:
         env:
           APP_NAME: hello-world
         run: |
-          aws eks update-kubeconfig --region us-east-2 --name ${{ vars.CLUSTER_NAME }}
           echo "Polling application status for $APP_NAME..."
           
           INITIAL_CHECK_DONE=false
