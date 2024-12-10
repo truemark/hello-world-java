@@ -60,7 +60,7 @@ jobs:
 
       - name: EKS Cluster Login
         run: |
-          aws eks update-kubeconfig --region us-east-2 --name ${{ vars.CLUSTER_NAME }}
+          aws eks update-kubeconfig --region us-east-2 --name truemark-eks
 
       - name: Copy Updates to Deployment Repo
         env:
