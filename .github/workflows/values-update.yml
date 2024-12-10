@@ -1,10 +1,24 @@
 name: Values Only Deployment
 
 on:
-  push:
-    paths:
-      - 'k8s/values/**'
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        type: string
+      updated_file:
+        description: "Path to the updated file"
+        required: true
+        type: string
+      app_name:
+        description: "Name of the application"
+        required: true
+        type: string
+      cluster:
+        description: "Name of the EKS cluster"
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -14,29 +28,6 @@ jobs:
   values-update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Environment Variable
-        run: |
-          UPDATED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
-          echo "Updated files: $UPDATED_FILES"
-
-          if echo "$UPDATED_FILES" | grep -q "k8s/values/prod.yaml"; then
-            echo "ENVIRONMENT=prod" >> $GITHUB_ENV
-            echo "UPDATED_FILE=k8s/values/prod.yaml" >> $GITHUB_ENV
-          elif echo "$UPDATED_FILES" | grep -q "k8s/values/stage.yaml"; then
-            echo "ENVIRONMENT=stage" >> $GITHUB_ENV
-            echo "UPDATED_FILE=k8s/values/stage.yaml" >> $GITHUB_ENV
-          elif echo "$UPDATED_FILES" | grep -q "k8s/values/values.yaml"; then
-            echo "ENVIRONMENT=shared" >> $GITHUB_ENV
-            echo "UPDATED_FILE=k8s/values/values.yaml" >> $GITHUB_ENV
-          else
-            echo "No matching environment file found"
-            exit 1
-          fi
-          echo "APP_NAME=hello-world" >> $GITHUB_ENV
 
       - name: Install Kubectl and YQ
         uses: truemark/kubectl-action@converting-to-typescript
@@ -66,25 +57,21 @@ jobs:
 
       - name: EKS Cluster Login
         run: |
-          aws eks update-kubeconfig --region us-east-2 --name truemark-eks
+          aws eks update-kubeconfig --region us-east-2 --name ${{ inputs.cluster }}
 
       - name: Copy Updates to Deployment Repo
-        env:
-          ENVIRONMENT: ${{ env.ENVIRONMENT }}
-          UPDATED_FILE: ${{ env.UPDATED_FILE }}
-          APP_NAME: ${{ env.APP_NAME }}
         run: |
-          cp $UPDATED_FILE k8s-deployments/environments/${ENVIRONMENT}/${APP_NAME}/
+          cp $UPDATED_FILE k8s-deployments/environments/${{ inputs.ENVIRONMENT }}/${{ inputs.APP_NAME }}/
           cd k8s-deployments
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add environments/${ENVIRONMENT}/${APP_NAME}/$(basename $UPDATED_FILE)
-          git commit -m "Update deployment values for $ENVIRONMENT from ${UPDATED_FILE}"
+          git add environments/${{ inputs.ENVIRONMENT }}/${{ inputs.APP_NAME }}/$(basename ${{ inputs.updated_file }})
+          git commit -m "Update deployment values for ${{ inputs.ENVIRONMENT }} from ${{ inputs.UPDATED_FILE }}"
           git push origin main
 
       - name: Poll App Status
         env:
-          APP_NAME: ${{ env.APP_NAME }}
+          APP_NAME: ${{ inputs.APP_NAME }}
         run: |
           echo "Polling application status for $APP_NAME..."
           
