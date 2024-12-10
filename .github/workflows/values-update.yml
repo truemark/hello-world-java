@@ -58,6 +58,12 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           path: k8s-deployments
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: "${{ vars.AWS_ASSUME_ROLE_DEPLOY }}"
+          aws-region: "us-east-2"
+
       - name: EKS Cluster Login
         run: |
           aws eks update-kubeconfig --region us-east-2 --name truemark-eks
