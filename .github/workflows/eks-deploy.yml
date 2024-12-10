@@ -75,8 +75,7 @@ jobs:
       - name: Update image tag in values.yaml
         run: |
           APP_NAME="hello-world"
-          APP_FILE="k8s/applications/hello-world.yaml"
-          VALUES_FILE="k8s/applications/hello-world/${{ inputs.environment }}.yaml"
+          APP_FILE="k8s/hello-world.yaml"
           ENVIRONMENT="${{ inputs.environment }}"
           yq eval ".spec.sources[].helm.valueFiles |= map(select(. != \"\").gsub(\"{{environment}}\", \"$ENVIRONMENT\"))" -i $APP_FILE
           echo "Checking if ArgoCD Application $APP_NAME exists..."
