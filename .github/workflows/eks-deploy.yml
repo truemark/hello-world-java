@@ -77,7 +77,7 @@ jobs:
           APP_NAME="hello-world"
           APP_FILE="k8s/hello-world.yaml"
           ENVIRONMENT="${{ inputs.environment }}"
-          yq eval ".spec.sources[].helm.valueFiles |= map(select(. != \"\").gsub(\"{{environment}}\", \"$ENVIRONMENT\"))" -i $APP_FILE
+          sed -i "s/{{environment}}/${ENVIRONMENT}/g" $APP_FILE
           echo "Checking if ArgoCD Application $APP_NAME exists..."
           if ! kubectl get application -n argocd $APP_NAME >/dev/null 2>&1; then
             echo "$APP_NAME not found. Applying configuration from $APP_FILE."
