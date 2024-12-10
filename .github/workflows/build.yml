@@ -63,7 +63,7 @@ jobs:
     needs: [ cdk-deploy-stage ]
 
   cdk-diff-prod:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
     name: CDK diff to Prod
     uses: ./.github/workflows/cdk-diff.yml
     with:
@@ -73,7 +73,7 @@ jobs:
     needs: [ build-maven, build-docker ]
 
   cdk-deploy-prod:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
     name: CDK deploy to Prod
     uses: ./.github/workflows/cdk-deploy.yml
     with:
@@ -83,7 +83,7 @@ jobs:
     needs: [ cdk-diff-prod ]
 
   eks-deploy-prod:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
     name: EKS deploy to Prod
     uses: ./.github/workflows/eks-deploy.yml
     with:
