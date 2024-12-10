@@ -78,7 +78,8 @@ jobs:
             echo "$APP_NAME already exists."
           fi
           yq eval ".deployment.image.tag = \"$IMAGE_TAG\"" -i k8s/values/${{ inputs.environment }}.yaml
-          cp -r k8s/values/*.yaml k8s-deployments/applications/hello-world/
+          cp -r k8s/values/values.yaml k8s-deployments/applications/hello-world/values.yaml
+          cp -r k8s/values/${{ inputs.environment }}.yaml k8s-deployments/applications/hello-world/${{ inputs.environment }}.yaml
           cd k8s-deployments
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
