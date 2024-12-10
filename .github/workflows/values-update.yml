@@ -1,10 +1,10 @@
 name: Values Only Deployment
 
 on:
+  push:
+    paths:
+      - 'k8s/values/**'
   workflow_dispatch:
-    push:
-      paths:
-        - 'k8s/values/**'
 
 permissions:
   id-token: write
