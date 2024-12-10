@@ -44,19 +44,11 @@ jobs:
         run: |
           aws eks update-kubeconfig --region us-east-2 --name ${{ vars.CLUSTER_NAME }}
 
-      - name: Install kubectl
-        run: |
-          echo "Installing kubectl..."
-          KUBECTL_VERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
-          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$KUBECTL_VERSION/bin/linux/amd64/kubectl"
-          chmod +x ./kubectl
-          sudo mv ./kubectl /usr/local/bin/kubectl
-          echo "kubectl installed successfully."
-
-      - name: Install yq
-        run: |
-          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
-          sudo chmod +x /usr/bin/yq
+      - name: Install kubectl and yq
+        uses: truemark/kubectl-action@converting-to-typescript
+        with:
+          yq-enabled: true
+          kubectl-enabled: true
 
       - name: Generate token
         id: app-token
