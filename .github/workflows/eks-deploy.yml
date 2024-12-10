@@ -71,19 +71,14 @@ jobs:
           ENVIRONMENT="${{ inputs.environment }}"
           sed -i "s/{{environment}}/${ENVIRONMENT}/g" $APP_FILE
           echo "Checking if ArgoCD Application $APP_NAME exists..."
-          if ! kubectl get application -n argocd $APP_NAME >/dev/null 2>&1; then
-            echo "$APP_NAME not found. Applying configuration from $APP_FILE."
-            kubectl apply -f $APP_FILE
-          else
-            echo "$APP_NAME already exists."
-          fi
+          kubectl apply -f $APP_FILE
           yq eval ".deployment.image.tag = \"$IMAGE_TAG\"" -i k8s/values/${{ inputs.environment }}.yaml
           cp -r k8s/values/values.yaml k8s-deployments/environments/${{ inputs.environment }}/hello-world/values.yaml
           cp -r k8s/values/${{ inputs.environment }}.yaml k8s-deployments/environments/${{ inputs.environment }}/hello-world/${{ inputs.environment }}.yaml
           cd k8s-deployments
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add k8s-deployments/environments/${{ inputs.environment }}
+          git add environments/${{ inputs.environment }}
           git commit -m "Update image tag to $IMAGE_TAG"
           git push origin main
 
