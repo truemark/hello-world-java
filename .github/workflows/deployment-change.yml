@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 jobs:
-  update-values:
+  setup-values-update:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
             echo "ENVIRONMENT=stage" >> $GITHUB_ENV
             echo "UPDATED_FILE=k8s/values/stage.yaml" >> $GITHUB_ENV
           elif echo "$UPDATED_FILES" | grep -q "k8s/values/values.yaml"; then
-            echo "ENVIRONMENT=shared" >> $GITHUB_ENV
+            echo "ENVIRONMENT=stage" >> $GITHUB_ENV
             echo "UPDATED_FILE=k8s/values/values.yaml" >> $GITHUB_ENV
           else
             echo "No matching environment file found"
