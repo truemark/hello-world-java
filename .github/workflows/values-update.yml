@@ -18,11 +18,9 @@ jobs:
 
       - name: Setup Environment Variable
         run: |
-          # Get the list of updated files
           UPDATED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
           echo "Updated files: $UPDATED_FILES"
 
-          # Check which file were updated
           if echo "$UPDATED_FILES" | grep -q "k8s/values/prod.yaml"; then
             echo "ENVIRONMENT=prod" >> $GITHUB_ENV
             echo "UPDATED_FILE=k8s/values/prod.yaml" >> $GITHUB_ENV
