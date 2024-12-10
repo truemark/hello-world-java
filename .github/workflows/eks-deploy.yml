@@ -84,11 +84,11 @@ jobs:
             echo "$APP_NAME not found. Applying configuration from $APP_FILE."
             kubectl apply -f $APP_FILE
           else
-            echo "$APP_NAME already exists. Updating values file before syncing."
-            yq eval ".deployment.image.tag = \"$IMAGE_TAG\"" -i k8s/values/${{ inputs.environment }}.yaml
+            echo "$APP_NAME already exists."
           fi
+          yq eval ".deployment.image.tag = \"$IMAGE_TAG\"" -i k8s/values/${{ inputs.environment }}.yaml
+          cp -r k8s/values/*.yaml k8s-deployments/applications/hello-world/
           cd k8s-deployments
-          cp -r k8s/values/*.yaml applications/hello-world/
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add applications/hello-world/
