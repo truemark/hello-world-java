@@ -1,7 +1,7 @@
 name: Values Only Deployment
 
 on:
-  workflow_call:
+  workflow_run:
     inputs:
       environment:
         description: "Environment to deploy to"
