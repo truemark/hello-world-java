@@ -19,7 +19,7 @@ spec:
       helm:
         valueFiles:
           - $values/applications/hello-world/values.yaml
-          - $values/applications/hello-world/{{environment}}.yaml
+          - $values/environments/{{environment}}/hello-world/{{environment}}.yaml
         releaseName: hello-world
         ignoreMissingValueFiles: true
       chart: k8s-app
