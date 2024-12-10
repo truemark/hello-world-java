@@ -40,7 +40,7 @@ jobs:
 
       - name: Deploy Stage Changes
         if: env.ENVIRONMENT == 'stage'
-        uses: truemark/github-workflows/.github/workflows/values-update.yml@argocd-demo
+        uses: ./.github/workflows/values-update.yml@argocd-demo
         with:
           environment: ${{ env.ENVIRONMENT }}
           updated_file: ${{ env.UPDATED_FILE }}
@@ -49,7 +49,7 @@ jobs:
 
       - name: Deploy Prod Changes
         if: env.ENVIRONMENT == 'prod'
-        uses: truemark/github-workflows/.github/workflows/values-update.yml@argocd-demo
+        uses: ./.github/workflows/values-update.yml@argocd-demo
         with:
           environment: ${{ env.ENVIRONMENT }}
           updated_file: ${{ env.UPDATED_FILE }}
