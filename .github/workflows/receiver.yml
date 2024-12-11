@@ -1,0 +1,17 @@
+name: Receiver Workflow
+
+on:
+  workflow_run:
+    workflows:
+      - Trigger Workflow
+    types:
+      - completed
+    branches:
+      - testing-secondary-workflows
+
+jobs:
+  receiver:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm Trigger
+        run: echo "Receiver workflow triggered"
