@@ -1,24 +1,10 @@
 name: Values Only Deployment
 
 on:
+  push:
+    paths:
+      - 'kubernetes/**'
   workflow_dispatch:
-    inputs:
-      environment:
-        description: "Environment to deploy to"
-        required: true
-        type: string
-      updated_file:
-        description: "Path to the updated file"
-        required: true
-        type: string
-      app_name:
-        description: "Name of the application"
-        required: true
-        type: string
-      cluster:
-        description: "Name of the EKS cluster"
-        required: true
-        type: string
 
 permissions:
   id-token: write
@@ -27,7 +13,31 @@ permissions:
 jobs:
   values-update:
     runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.set-environment.outputs.environment }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Environment
+        id: set-environment
+        run: |
+          UPDATED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          echo "Updated files: $UPDATED_FILES"
+          
+          if echo "$UPDATED_FILES" | grep -q "kubernetes/prod/values.yaml"; then
+            echo "environment=prod" >> $GITHUB_ENV
+            echo "::set-output name=environment::prod"
+          elif echo "$UPDATED_FILES" | grep -q "kubernetes/stage/values.yaml"; then
+            echo "environment=stage" >> $GITHUB_ENV
+            echo "::set-output name=environment::stage"
+          else
+            echo "No matching environment file found"
+            exit 1
+          fi
+          echo "APP_NAME=hello-world" >> $GITHUB_ENV
+
       - name: Install Kubectl and YQ
         uses: truemark/kubectl-action@converting-to-typescript
         with:
@@ -48,67 +58,22 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           path: k8s-deployments
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: "${{ vars.AWS_ASSUME_ROLE_DEPLOY }}"
-          aws-region: "us-east-2"
-
-      - name: EKS Cluster Login
-        run: |
-          aws eks update-kubeconfig --region us-east-2 --name ${{ inputs.cluster }}
-
       - name: Copy Updates to Deployment Repo
+        env:
+          ENVIRONMENT: ${{ env.ENVIRONMENT }}
+          APP_NAME: ${{ env.APP_NAME }}
+          UPDATED_FILE: ${{ env.UPDATED_FILE }}
         run: |
-          cp $UPDATED_FILE k8s-deployments/environments/${{ inputs.ENVIRONMENT }}/${{ inputs.APP_NAME }}/
+          cp $UPDATED_FILE k8s-deployments/environments/${{ env.ENVIRONMENT }}/${{ env.APP_NAME }}/
           cd k8s-deployments
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add environments/${{ inputs.ENVIRONMENT }}/${{ inputs.APP_NAME }}/$(basename ${{ inputs.updated_file }})
-          git commit -m "Update deployment values for ${{ inputs.ENVIRONMENT }} from ${{ inputs.UPDATED_FILE }}"
+          git add environments/${{ env.ENVIRONMENT }}/${{ env.APP_NAME }}/$(basename ${{ env.updated_file }})
+          git commit -m "Update deployment values for ${{ env.ENVIRONMENT }} from ${{ env.UPDATED_FILE }}"
           git push origin main
 
-      - name: Poll App Status
-        env:
-          APP_NAME: ${{ inputs.APP_NAME }}
-        run: |
-          echo "Polling application status for $APP_NAME..."
-          
-          INITIAL_CHECK_DONE=false
-          MAX_ATTEMPTS=30
-          ATTEMPT=0
-          
-          while [[ $ATTEMPT -lt $MAX_ATTEMPTS ]]; do
-          STATUS=$(kubectl get -n argocd application/$APP_NAME -o jsonpath='{.status.sync.status}')
-          HEALTH=$(kubectl get -n argocd application/$APP_NAME -o jsonpath='{.status.health.status}')
-          echo "$(date): Sync status: $STATUS, Health status: $HEALTH"
-          
-          # Ignore the initial Healthy/Synced state
-          if [[ "$INITIAL_CHECK_DONE" == "false" ]]; then
-          echo "Ignoring initial status: Sync=$STATUS, Health=$HEALTH"
-          if [[ "$STATUS" != "Synced" || "$HEALTH" != "Healthy" ]]; then
-          INITIAL_CHECK_DONE=true
-          fi
-          else
-          # Check for successful sync and healthy state
-          if [[ "$STATUS" == "Synced" && "$HEALTH" == "Healthy" ]]; then
-          echo "Application $APP_NAME successfully synced and healthy."
-          break
-          fi
-          fi
-          
-          # Increment the attempt counter
-          ATTEMPT=$((ATTEMPT + 1))
-          echo "Attempt $ATTEMPT/$MAX_ATTEMPTS complete. Retrying in 10 seconds..."
-          
-          # Wait for 10 seconds before polling again
-          sleep 10
-          done
-          
-          if [[ $ATTEMPT -ge $MAX_ATTEMPTS ]]; then
-          echo "Reached maximum attempts ($MAX_ATTEMPTS). Exiting with failure."
-          exit 1
-          fi
-          
-          echo "Recent events for $APP_NAME:"
-          kubectl get -n argocd events --field-selector involvedObject.name=$APP_NAME --sort-by='.metadata.creationTimestamp' -o wide | tail -n 5
+      - name: Upload Environment Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: environment
+          path: environment.txt
