@@ -1,0 +1,85 @@
+name: Values Update
+
+on:
+  push:
+    paths:
+      - 'kubernetes/**'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: write
+  actions: write
+
+jobs:
+  values-update:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.setup-environment.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Environment
+        id: setup-environment
+        run: |
+          UPDATED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          echo "Updated files: $UPDATED_FILES"
+          
+          if echo "$UPDATED_FILES" | grep -q "kubernetes/prod/values.yaml"; then
+            echo "prod" > environment.txt
+            echo "environment=prod" >> $GITHUB_ENV
+          elif echo "$UPDATED_FILES" | grep -q "kubernetes/stage/values.yaml"; then
+            echo "stage" > environment.txt
+            echo "environment=stage" >> $GITHUB_ENV
+          else
+            echo "No matching environment file found"
+            exit 1
+          fi
+          
+          echo "$UPDATED_FILES" > updated_files.txt
+          echo "UPDATED_FILES=$(cat updated_files.txt)" >> $GITHUB_ENV
+          echo "APP_NAME=hello-world" >> $GITHUB_ENV
+
+      - name: Install Kubectl and YQ
+        uses: truemark/kubectl-action@converting-to-typescript
+        with:
+          yq-enabled: true
+          kubectl-enabled: true
+
+      - name: Generate token
+        id: app-token
+        uses: getsentry/action-github-app-token@v3
+        with:
+          app_id: ${{ secrets.RELEASE_BOT_ID }}
+          private_key: ${{ secrets.RELEASE_BOT_KEY }}
+
+      - name: Checkout Deployment Repo
+        uses: actions/checkout@v4
+        with:
+          repository: truemark/k8s-deployments
+          token: ${{ steps.app-token.outputs.token }}
+          path: k8s-deployments
+
+      - name: Copy Updates to Deployment Repo
+        env:
+          ENVIRONMENT: ${{ env.environment }}
+          APP_NAME: ${{ env.APP_NAME }}
+          UPDATED_FILES: ${{ env.UPDATED_FILES }}
+        run: |
+          cp ${{ env.UPDATED_FILES }} k8s-deployments/environments/${{ env.ENVIRONMENT }}/${{ env.APP_NAME }}/
+          cd k8s-deployments
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add environments/${{ env.ENVIRONMENT }}/${{ env.APP_NAME }}/$(basename ${{ env.UPDATED_FILES }})
+          git commit -m "Update deployment values for ${{ env.ENVIRONMENT }} from ${{ env.UPDATED_FILES }}"
+          git push origin main
+
+      - name: Upload Environment Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: environment-and-files
+          path: |
+            environment.txt
+            updated_files.txt
