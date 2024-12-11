@@ -14,29 +14,37 @@ jobs:
   values-update:
     runs-on: ubuntu-latest
     outputs:
-      environment: ${{ steps.set-environment.outputs.environment }}
+      environment: ${{ steps.setup-environment.outputs.environment }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup Environment
-        id: set-environment
+        id: setup-environment
         run: |
           UPDATED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
           echo "Updated files: $UPDATED_FILES"
           
           if echo "$UPDATED_FILES" | grep -q "kubernetes/prod/values.yaml"; then
+            echo "prod" > environment.txt
             echo "environment=prod" >> $GITHUB_ENV
-            echo "::set-output name=environment::prod"
           elif echo "$UPDATED_FILES" | grep -q "kubernetes/stage/values.yaml"; then
+            echo "stage" > environment.txt
             echo "environment=stage" >> $GITHUB_ENV
-            echo "::set-output name=environment::stage"
           else
             echo "No matching environment file found"
             exit 1
           fi
-          echo "APP_NAME=hello-world" >> $GITHUB_ENV
+        outputs:
+          environment: ${{ env.environment }}
+          updated_files: $UPDATED_FILES
+
+      - name: Set Output
+        id: set-environment-output
+        run: |
+          echo "environment=$(cat environment.txt)" >> $GITHUB_ENV
+          echo "$(cat environment.txt)" >> $GITHUB_ENV
 
       - name: Install Kubectl and YQ
         uses: truemark/kubectl-action@converting-to-typescript
@@ -60,7 +68,7 @@ jobs:
 
       - name: Copy Updates to Deployment Repo
         env:
-          ENVIRONMENT: ${{ env.ENVIRONMENT }}
+          ENVIRONMENT: ${{ env.environment }}
           APP_NAME: ${{ env.APP_NAME }}
           UPDATED_FILES: ${{ env.UPDATED_FILES }}
         run: |
