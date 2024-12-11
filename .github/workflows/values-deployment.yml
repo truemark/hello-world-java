@@ -22,7 +22,12 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: image-tag
+          name: environment
+
+      - name: Load Environment Variable
+        run: |
+          ENVIRONMENT=$(cat environment.txt)
+          echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2

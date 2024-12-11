@@ -36,15 +36,6 @@ jobs:
             echo "No matching environment file found"
             exit 1
           fi
-        outputs:
-          environment: ${{ env.environment }}
-          updated_files: $UPDATED_FILES
-
-      - name: Set Output
-        id: set-environment-output
-        run: |
-          echo "environment=$(cat environment.txt)" >> $GITHUB_ENV
-          echo "$(cat environment.txt)" >> $GITHUB_ENV
 
       - name: Install Kubectl and YQ
         uses: truemark/kubectl-action@converting-to-typescript
