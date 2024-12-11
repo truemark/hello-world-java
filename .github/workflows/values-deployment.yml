@@ -8,7 +8,7 @@ on:
     types:
       - completed
     branches:
-      - "**"
+      - feat/argocd
 
 permissions:
   id-token: write
