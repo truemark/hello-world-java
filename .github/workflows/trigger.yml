@@ -3,7 +3,7 @@ name: Trigger Workflow
 on:
   push:
     branches:
-      - testing-secondary-workflows
+      - main
 
 jobs:
   trigger:

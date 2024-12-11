@@ -7,7 +7,7 @@ on:
     types:
       - completed
     branches:
-      - testing-secondary-workflows
+      - main
 
 jobs:
   receiver:
