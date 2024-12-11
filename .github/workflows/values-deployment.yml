@@ -1,85 +1,86 @@
-name: Values Update
+name: ArgoCD Deployment
 
 on:
-  push:
-    paths:
-      - 'kubernetes/**'
-  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Values Update
+    types:
+      - completed
+    branches:
+      - feat/argocd
 
 permissions:
   id-token: write
   contents: write
-  actions: write
 
 jobs:
-  values-update:
+  deploy:
     runs-on: ubuntu-latest
-    outputs:
-      environment: ${{ steps.setup-environment.outputs.environment }}
+    environment: ${{ env.ENVIRONMENT }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Environment
-        id: setup-environment
-        run: |
-          UPDATED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
-          echo "Updated files: $UPDATED_FILES"
-          
-          if echo "$UPDATED_FILES" | grep -q "kubernetes/prod/values.yaml"; then
-            echo "prod" > environment.txt
-            echo "environment=prod" >> $GITHUB_ENV
-          elif echo "$UPDATED_FILES" | grep -q "kubernetes/stage/values.yaml"; then
-            echo "stage" > environment.txt
-            echo "environment=stage" >> $GITHUB_ENV
-          else
-            echo "No matching environment file found"
-            exit 1
-          fi
-          
-          echo "$UPDATED_FILES" > updated_files.txt
-          echo "UPDATED_FILES=$(cat updated_files.txt)" >> $GITHUB_ENV
-          echo "APP_NAME=hello-world" >> $GITHUB_ENV
-
-      - name: Install Kubectl and YQ
-        uses: truemark/kubectl-action@converting-to-typescript
-        with:
-          yq-enabled: true
-          kubectl-enabled: true
-
-      - name: Generate token
-        id: app-token
-        uses: getsentry/action-github-app-token@v3
-        with:
-          app_id: ${{ secrets.RELEASE_BOT_ID }}
-          private_key: ${{ secrets.RELEASE_BOT_KEY }}
-
-      - name: Checkout Deployment Repo
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          repository: truemark/k8s-deployments
-          token: ${{ steps.app-token.outputs.token }}
-          path: k8s-deployments
 
-      - name: Copy Updates to Deployment Repo
-        env:
-          ENVIRONMENT: ${{ env.environment }}
-          APP_NAME: ${{ env.APP_NAME }}
-          UPDATED_FILES: ${{ env.UPDATED_FILES }}
-        run: |
-          cp ${{ env.UPDATED_FILES }} k8s-deployments/environments/${{ env.ENVIRONMENT }}/${{ env.APP_NAME }}/
-          cd k8s-deployments
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add environments/${{ env.ENVIRONMENT }}/${{ env.APP_NAME }}/$(basename ${{ env.UPDATED_FILES }})
-          git commit -m "Update deployment values for ${{ env.ENVIRONMENT }} from ${{ env.UPDATED_FILES }}"
-          git push origin main
-
-      - name: Upload Environment Artifact
-        uses: actions/upload-artifact@v4
+      - name: Download artifact
+        uses: actions/download-artifact@v4
         with:
           name: environment-and-files
-          path: |
-            environment.txt
-            updated_files.txt
+
+      - name: Load Environment Variables
+        run: |
+          ENVIRONMENT=$(cat environment.txt)
+          UPDATED_FILES=$(cat updated_files.txt)
+          echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
+          echo "UPDATED_FILES=$UPDATED_FILES" >> $GITHUB_ENV
+
+      - name: Print Variables
+        run: |
+          echo "Environment: $ENVIRONMENT"
+          echo "Updated files: $UPDATED_FILES"
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: "${{ vars.AWS_ASSUME_ROLE_DEPLOY }"
+          aws-region: us-east-2
+
+      - name: EKS cluster login
+        run: |
+          aws eks update-kubeconfig --region us-east-2 --name ${{ vars.CLUSTER_NAME }}
+
+      - name: Install kubectl and yq
+        uses: truemark/kubectl-action@converting-to-typescript
+        with:
+          kubectl-enabled: true
+
+      - name: Poll application status
+        env:
+          APP_NAME: hello-world
+        run: |
+          echo "Polling application status for $APP_NAME..."
+          INITIAL_CHECK_DONE=false
+          MAX_ATTEMPTS=30
+          ATTEMPT=0
+          while [[ $ATTEMPT -lt $MAX_ATTEMPTS ]]; do
+            STATUS=$(kubectl get -n argocd application/$APP_NAME -o jsonpath='{.status.sync.status}')
+            HEALTH=$(kubectl get -n argocd application/$APP_NAME -o jsonpath='{.status.health.status}')
+            echo "$(date): Sync status: $STATUS, Health status: $HEALTH"
+            if [[ "$INITIAL_CHECK_DONE" == "false" ]]; then
+              if [[ "$STATUS" != "Synced" || "$HEALTH" != "Healthy" ]]; then
+                INITIAL_CHECK_DONE=true
+              fi
+            else
+              if [[ "$STATUS" == "Synced" && "$HEALTH" == "Healthy" ]]; then
+                echo "Application $APP_NAME successfully synced and healthy."
+                break
+              fi
+            fi
+            ATTEMPT=$((ATTEMPT + 1))
+            echo "Attempt $ATTEMPT/$MAX_ATTEMPTS complete. Retrying in 10 seconds..."
+            sleep 10
+          done
+          if [[ $ATTEMPT -ge $MAX_ATTEMPTS ]]; then
+            echo "Reached maximum attempts ($MAX_ATTEMPTS). Exiting with failure."
+            exit 1
+          fi
+          kubectl get -n argocd events --field-selector involvedObject.name=$APP_NAME --sort-by='.metadata.creationTimestamp' -o wide | tail -n 5
