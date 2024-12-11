@@ -26,8 +26,9 @@ jobs:
         id: setup-environment
         run: |
           UPDATED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          echo $UPDATED_FILES > updated_files.txt
           echo "UPDATED_FILES=$(cat updated_files.txt)" >> $GITHUB_ENV
-          echo "APP_NAME=$(cat app_name.txt)" >> $GITHUB_ENV
+          echo "APP_NAME=hello-world" >> $GITHUB_ENV
 
       - name: Install Kubectl and YQ
         uses: truemark/kubectl-action@converting-to-typescript
