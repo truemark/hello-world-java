@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 jobs:
-  stage-values-update:
+  prod-values-update:
     name: Update Values for Prod
     runs-on: ubuntu-latest
     environment: prod
