@@ -36,6 +36,8 @@ jobs:
             echo "No matching environment file found"
             exit 1
           fi
+          
+          echo "$UPDATED_FILES" > updated_files.txt
 
       - name: Install Kubectl and YQ
         uses: truemark/kubectl-action@converting-to-typescript
@@ -74,5 +76,7 @@ jobs:
       - name: Upload Environment Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: environment
-          path: environment.txt
+          name: environment-and-files
+          path: |
+            environment.txt
+            updated_files.txt

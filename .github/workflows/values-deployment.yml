@@ -14,7 +14,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: ${{ github.event.workflow_run.conclusion.outputs.environment }}
+    environment: ${{ env.ENVIRONMENT }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,12 +22,19 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: environment
+          name: environment-and-files
 
-      - name: Load Environment Variable
+      - name: Load Environment Variables
         run: |
           ENVIRONMENT=$(cat environment.txt)
+          UPDATED_FILES=$(cat updated_files.txt)
           echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
+          echo "UPDATED_FILES=$UPDATED_FILES" >> $GITHUB_ENV
+
+      - name: Print Variables
+        run: |
+          echo "Environment: $ENVIRONMENT"
+          echo "Updated files: $UPDATED_FILES"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
