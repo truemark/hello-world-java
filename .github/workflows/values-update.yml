@@ -1,4 +1,4 @@
-name: Values Update
+name: Stage Values Update
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 jobs:
-  values-update:
+  stage-values-update:
     runs-on: ubuntu-latest
     environment: stage
     outputs:
