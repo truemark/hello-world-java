@@ -1,0 +1,13 @@
+name: Trigger Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Complete Successfully
+        run: echo "Trigger workflow completed"
