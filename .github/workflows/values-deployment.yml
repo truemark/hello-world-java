@@ -3,9 +3,11 @@ name: ArgoCD Deployment
 on:
   workflow_run:
     workflows:
-      - Values Only Deployment
+      - Values Update
     types:
       - completed
+    branches:
+      - "**"
 
 permissions:
   id-token: write

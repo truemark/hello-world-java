@@ -1,4 +1,4 @@
-name: Values Only Deployment
+name: Values Update
 
 on:
   push:
