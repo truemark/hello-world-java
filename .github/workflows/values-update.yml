@@ -62,14 +62,14 @@ jobs:
         env:
           ENVIRONMENT: ${{ env.ENVIRONMENT }}
           APP_NAME: ${{ env.APP_NAME }}
-          UPDATED_FILE: ${{ env.UPDATED_FILE }}
+          UPDATED_FILES: ${{ env.UPDATED_FILES }}
         run: |
           cp $UPDATED_FILE k8s-deployments/environments/${{ env.ENVIRONMENT }}/${{ env.APP_NAME }}/
           cd k8s-deployments
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add environments/${{ env.ENVIRONMENT }}/${{ env.APP_NAME }}/$(basename ${{ env.updated_file }})
-          git commit -m "Update deployment values for ${{ env.ENVIRONMENT }} from ${{ env.UPDATED_FILE }}"
+          git add environments/${{ env.ENVIRONMENT }}/${{ env.APP_NAME }}/$(basename ${{ env.UPDATED_FILES }})
+          git commit -m "Update deployment values for ${{ env.ENVIRONMENT }} from ${{ env.UPDATED_FILES }}"
           git push origin main
 
       - name: Upload Environment Artifact
