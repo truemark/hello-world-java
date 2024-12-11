@@ -2,6 +2,9 @@ name: Prod Values Update
 
 on:
   push:
+    branches:
+      - main
+      - hotfix/**
     paths:
       - 'kubernetes/prod/**'
   workflow_dispatch:
