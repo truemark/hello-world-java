@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   stage-values-update:
+    name: Update Values for Stage
     runs-on: ubuntu-latest
     environment: stage
     outputs:
