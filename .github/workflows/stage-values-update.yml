@@ -64,6 +64,13 @@ jobs:
           git commit -m "Update deployment values for stage from ${{ env.UPDATED_FILES }}"
           git push origin main
 
+      - name: Set Summary of Changes
+        env:
+          APP_NAME: ${{ env.APP_NAME }}
+          UPDATED_FILES: ${{ env.UPDATED_FILES }}
+        run: |
+          echo "Updated values for $APP_NAME in stage from $UPDATED_FILES"
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
