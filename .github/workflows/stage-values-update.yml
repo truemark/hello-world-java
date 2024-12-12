@@ -76,7 +76,7 @@ jobs:
             echo "NO_CHANGES=true" >> $GITHUB_ENV
             exit 1
           else
-            git diff --staged > ../git_diff_output.txt
+            git diff --staged > echo ${{ github.workspace }}/git_diff_output.txt
             git commit -m "Update deployment values for stage from ${{ env.UPDATED_FILES }}"
             git push origin main
             if [[ $? -ne 0 ]]; then
@@ -86,12 +86,12 @@ jobs:
           fi
           echo ${{ github.workspace }}
 
-      - name: Debugging Step
-        run: |
-          echo "Checking if git_diff_output.txt exists..."
-          ls -al 
-          pwd
-          echo ${{ github.workspace }}
+#      - name: Debugging Step
+#        run: |
+#          echo "Checking if git_diff_output.txt exists..."
+#          ls -al
+#          pwd
+#          echo ${{ github.workspace }}
 
       - name: Failure Summary
         if: env.NO_CHANGES == 'true' || env.PUSH_FAILED == 'true'
@@ -108,7 +108,7 @@ jobs:
             echo ":x: Git push failed for $APP_NAME in stage from $UPDATED_FILES. Details below: :x:" >> $GITHUB_STEP_SUMMARY
             echo "### Git Push Output" >> $GITHUB_STEP_SUMMARY
             echo "```" >> $GITHUB_STEP_SUMMARY
-            cat git_push_output.txt >> $GITHUB_STEP_SUMMARY
+            cat ${{ github.workspace }}/git_push_output.txt >> $GITHUB_STEP_SUMMARY
             echo "```" >> $GITHUB_STEP_SUMMARY
             echo "### Additional Debug Info:" >> $GITHUB_STEP_SUMMARY
             echo "Remote Info:" >> $GITHUB_STEP_SUMMARY
@@ -123,12 +123,11 @@ jobs:
           APP_NAME: ${{ env.APP_NAME }}
           UPDATED_FILES: ${{ env.UPDATED_FILES }}
         run: |
-          echo ${{ github.workspace }}
           echo ":thumbsup: Updated values for $APP_NAME in stage from $UPDATED_FILES :thumbsup:" >> $GITHUB_STEP_SUMMARY
-          if [ -f git_diff_output.txt ]; then
+          if [ -f ${{ github.workspace }}/git_diff_output.txt ]; then
             echo "### Changes Made:" >> $GITHUB_STEP_SUMMARY
             echo "```diff" >> $GITHUB_STEP_SUMMARY
-            cat git_diff_output.txt >> $GITHUB_STEP_SUMMARY
+            cat ${{ github.workspace }}/git_diff_output.txt >> $GITHUB_STEP_SUMMARY
             echo "```" >> $GITHUB_STEP_SUMMARY
           else
             echo "No changes detected in the diff output." >> $GITHUB_STEP_SUMMARY
