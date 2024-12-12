@@ -61,21 +61,21 @@ jobs:
           cd k8s-deployments
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
+
           git add environments/stage/${{ env.APP_NAME }}/$(basename ${{ env.UPDATED_FILES }})
           if git diff-index --quiet HEAD; then
             echo "No changes to commit."
             echo "NO_CHANGES=true" >> $GITHUB_ENV
           else
+            git diff --staged > git_diff_output.txt
             git commit -m "Update deployment values for stage from ${{ env.UPDATED_FILES }}"
             git push origin main > git_push_output.txt 2>&1 || {
-            echo "PUSH_FAILED=true" >> $GITHUB_ENV
+              echo "PUSH_FAILED=true" >> $GITHUB_ENV
+              echo "Git push failed. See output:" >> git_push_output.txt
+              cat git_push_output.txt
+              exit 1
+            }
             echo "NO_CHANGES=false" >> $GITHUB_ENV
-            echo "PUSH_FAILED=false" >> $GITHUB_ENV
-            echo "Git push failed. See output:" >> git_push_output.txt
-            cat git_push_output.txt
-            exit 1
-           }
           fi
 
       - name: Failure Summary
@@ -101,6 +101,10 @@ jobs:
           UPDATED_FILES: ${{ env.UPDATED_FILES }}
         run: |
           echo ":thumbsup: Updated values for $APP_NAME in stage from $UPDATED_FILES :thumbsup:" >> $GITHUB_STEP_SUMMARY
+          echo "### Changes Made:" >> $GITHUB_STEP_SUMMARY
+          echo "```diff" >> $GITHUB_STEP_SUMMARY
+          cat k8s-deployments/git_diff_output.txt >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
