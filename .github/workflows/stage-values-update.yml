@@ -69,7 +69,7 @@ jobs:
           APP_NAME: ${{ env.APP_NAME }}
           UPDATED_FILES: ${{ env.UPDATED_FILES }}
         run: |
-          echo "Updated values for $APP_NAME in stage from $UPDATED_FILES"
+          echo ":rocket:Updated values for $APP_NAME in stage from $UPDATED_FILES" >> $GITHUB_STEP_SUMMARY
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
