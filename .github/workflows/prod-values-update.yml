@@ -67,6 +67,13 @@ jobs:
           git commit -m "Update deployment values for prod from ${{ env.UPDATED_FILES }}"
           git push origin main
 
+      - name: Set Summary of Changes
+        env:
+          APP_NAME: ${{ env.APP_NAME }}
+          UPDATED_FILES: ${{ env.UPDATED_FILES }}
+        run: |
+          echo ":thumbsup: Updated values for $APP_NAME in prod from $UPDATED_FILES :thumbsup:" >> $GITHUB_STEP_SUMMARY
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:

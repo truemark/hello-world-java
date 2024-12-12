@@ -69,7 +69,7 @@ jobs:
           APP_NAME: ${{ env.APP_NAME }}
           UPDATED_FILES: ${{ env.UPDATED_FILES }}
         run: |
-          echo ":thumbsup:Updated values for $APP_NAME in stage from $UPDATED_FILES:thumbsup:" >> $GITHUB_STEP_SUMMARY
+          echo ":thumbsup: Updated values for $APP_NAME in stage from $UPDATED_FILES :thumbsup:" >> $GITHUB_STEP_SUMMARY
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
