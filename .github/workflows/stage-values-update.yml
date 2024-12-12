@@ -119,10 +119,10 @@ jobs:
         run: |
           ls -la
           pwd
-          if [ -f diff_output.txt ]; then
+          if [ -f ./diff_output.txt ]; then
             echo "### Changes Made:" >> $GITHUB_STEP_SUMMARY
             echo "```diff" >> $GITHUB_STEP_SUMMARY
-            cat diff_output.txt >> $GITHUB_STEP_SUMMARY
+            cat ./diff_output.txt >> $GITHUB_STEP_SUMMARY
             echo "```" >> $GITHUB_STEP_SUMMARY
           else
             echo "No changes detected in the diff output." >> $GITHUB_STEP_SUMMARY
