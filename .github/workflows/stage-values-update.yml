@@ -93,7 +93,7 @@ jobs:
           if [ "$PUSH_FAILED" == "true" ]; then
             echo ":x: Git push failed for $APP_NAME in stage from $UPDATED_FILES. Details below: :x:" >> $GITHUB_STEP_SUMMARY
             echo "```" >> $GITHUB_STEP_SUMMARY
-            cat k8s-deployments/git_push_output.txt >> $GITHUB_STEP_SUMMARY
+            cat git_push_output.txt >> $GITHUB_STEP_SUMMARY
             echo "```" >> $GITHUB_STEP_SUMMARY
           fi
 
@@ -104,10 +104,10 @@ jobs:
           UPDATED_FILES: ${{ env.UPDATED_FILES }}
         run: |
           echo ":thumbsup: Updated values for $APP_NAME in stage from $UPDATED_FILES :thumbsup:" >> $GITHUB_STEP_SUMMARY
-          if [ -f k8s-deployments/git_diff_output.txt ]; then
+          if [ -f git_diff_output.txt ]; then
             echo "### Changes Made:" >> $GITHUB_STEP_SUMMARY
             echo "```diff" >> $GITHUB_STEP_SUMMARY
-            cat k8s-deployments/git_diff_output.txt >> $GITHUB_STEP_SUMMARY
+            cat git_diff_output.txt >> $GITHUB_STEP_SUMMARY
             echo "```" >> $GITHUB_STEP_SUMMARY
           else
             echo "No changes detected in the diff output." >> $GITHUB_STEP_SUMMARY
