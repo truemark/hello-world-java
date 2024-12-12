@@ -88,7 +88,7 @@ jobs:
       - name: Debugging git_diff_output.txt
         run: |
           ls -lah
-          cat git_diff_output.txt
+          cat k8s-deployments/git_diff_output.txt
 
       - name: Failure Summary
         if: env.NO_CHANGES == 'true' || env.PUSH_FAILED == 'true' || failure() && steps.copy-updates.outcome == 'failure'
