@@ -1,4 +1,4 @@
-name: Stage Values Update
+name: Prod Values Update
 
 on:
   push:
