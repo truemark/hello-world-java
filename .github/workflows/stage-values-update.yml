@@ -121,10 +121,12 @@ jobs:
           UPDATED_FILES: ${{ env.UPDATED_FILES }}
         run: |
           if [ -f ./diff_output.txt ]; then
-            #echo "### Changes Made:" >> $GITHUB_STEP_SUMMARY
-            echo "```diff" >> $GITHUB_STEP_SUMMARY
-            cat ./diff_output.txt >> $GITHUB_STEP_SUMMARY
-            echo "```" >> $GITHUB_STEP_SUMMARY
+            {
+              echo "### Changes Made:";
+              echo "```diff";
+              cat ./diff_output.txt;
+              echo "```";
+            } >> $GITHUB_STEP_SUMMARY
           else
             echo "No changes detected in the diff output." >> $GITHUB_STEP_SUMMARY
           fi
