@@ -108,7 +108,7 @@ jobs:
         env:
           APP_NAME: ${{ env.APP_NAME }}
         run: |
-          if [ -f ./diff_output.txt ]; then
+          if [ -f ./image_diff_output.txt ]; then
             {
               echo '### Changes Applied:';
               echo '';
