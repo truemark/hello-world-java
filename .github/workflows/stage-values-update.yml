@@ -35,7 +35,6 @@ jobs:
           echo "UPDATED_FILES=$(cat updated_files.txt)" >> $GITHUB_ENV
           echo "APP_NAME=hello-world" >> $GITHUB_ENV
 
-
       - name: Install Kubectl and YQ
         uses: truemark/kubectl-action@converting-to-typescript
         with:
@@ -63,10 +62,12 @@ jobs:
           UPDATED_FILES: ${{ env.UPDATED_FILES }}
         run: |
           for file in ${{ env.UPDATED_FILES }}; do
-            cp $file k8s-deployments/environments/stage/${{ env.APP_NAME }}/
-            git add k8s-deployments/environments/stage/${{ env.APP_NAME }}/$(basename $file)
+            cp "$file" "k8s-deployments/environments/stage/${{ env.APP_NAME }}/"
           done
+
           cd k8s-deployments
+          git add "environments/stage/${{ env.APP_NAME }}/"
+
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -111,7 +112,7 @@ jobs:
             git remote -v >> $GITHUB_STEP_SUMMARY
             echo "HEAD Commit:" >> $GITHUB_STEP_SUMMARY
             git log -1 --oneline >> $GITHUB_STEP_SUMMARY
-          fi    
+          fi
 
       - name: Successful Summary
         if: env.NO_CHANGES != 'true' && env.PUSH_FAILED != 'true'
