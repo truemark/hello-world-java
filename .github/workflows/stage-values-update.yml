@@ -82,7 +82,7 @@ jobs:
           
           ls -lah
           ls -lah kubernetes
-          ls -lah kubernetes/stage
+          pwd
 
 
       - name: Failure Summary
