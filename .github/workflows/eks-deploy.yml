@@ -39,6 +39,7 @@ jobs:
         shell: bash
         run: | 
           echo "IMAGE_TAG=$(cat image-tag.txt)" >> $GITHUB_ENV
+          echo "APP_NAME=hello-world" >> $GITHUB_ENV
 
       - name: EKS cluster login
         run: |
@@ -65,12 +66,14 @@ jobs:
           path: k8s-deployments
 
       - name: Update image tag in values.yaml
+        id: copy-updates
+        env:
+          APP_NAME: ${{ env.APP_NAME }}
         run: |
-          APP_NAME="hello-world"
           APP_FILE="k8s/hello-world.yaml"
           ENVIRONMENT="${{ inputs.environment }}"
           sed -i "s/{{environment}}/${ENVIRONMENT}/g" $APP_FILE
-          echo "Checking if ArgoCD Application $APP_NAME exists..."
+          echo "Checking if ArgoCD Application ${{ env.APP_NAME }} exists..."
           kubectl apply -f $APP_FILE
           yq eval ".deployment.image.tag = \"$IMAGE_TAG\"" -i k8s/values/${{ inputs.environment }}.yaml
           cp -r k8s/values/values.yaml k8s-deployments/environments/${{ inputs.environment }}/hello-world/values.yaml
@@ -79,10 +82,46 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add environments/${{ inputs.environment }}
+          git diff --staged > ../image_diff_output.txt
           git commit -m "Update image tag to $IMAGE_TAG"
           git push origin main
+          if [[ $? -ne 0 ]]; then
+            echo "PUSH_FAILED=true" >> $GITHUB_ENV
+            exit 1
+          fi
+
+      - name: Failure Summary
+        if: env.PUSH_FAILED == 'true' || failure() && steps.copy-updates.outcome == 'failure'
+        env:
+          APP_NAME: ${{ env.APP_NAME }}
+        run: |
+          if [ "$PUSH_FAILED" == "true" ]; then
+            echo ":x: Git push failed for $APP_NAME :x:" >> $GITHUB_STEP_SUMMARY
+            echo "### Git Push Output" >> $GITHUB_STEP_SUMMARY
+            echo "```" >> $GITHUB_STEP_SUMMARY
+            cat git_push_output.txt >> $GITHUB_STEP_SUMMARY
+            echo "```" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Successful Summary
+        if: env.PUSH_FAILED != 'true'
+        env:
+          APP_NAME: ${{ env.APP_NAME }}
+        run: |
+          if [ -f ./diff_output.txt ]; then
+            {
+              echo '### Changes Applied:';
+              echo '';
+              echo '```diff';
+              cat ./image_diff_output.txt;
+              echo '```';
+            } >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No changes detected in the diff output." >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Poll application status
+        if: env.PUSH_FAILED != 'true' && steps.failure-summary.outcome != 'success'
         env:
           APP_NAME: hello-world
         run: |
