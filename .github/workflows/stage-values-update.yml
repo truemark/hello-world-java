@@ -122,7 +122,7 @@ jobs:
           UPDATED_FILES: ${{ env.UPDATED_FILES }}
         run: |
           echo ":thumbsup: Updated values for $APP_NAME in stage from $UPDATED_FILES :thumbsup:" >> $GITHUB_STEP_SUMMARY
-          if [ -f ../git_diff_output.txt ]; then
+          if [ -f git_diff_output.txt ]; then
             echo "### Changes Made:" >> $GITHUB_STEP_SUMMARY
             echo "```diff" >> $GITHUB_STEP_SUMMARY
             cat ../git_diff_output.txt >> $GITHUB_STEP_SUMMARY
