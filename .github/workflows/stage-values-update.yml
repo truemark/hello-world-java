@@ -94,7 +94,7 @@ jobs:
           if [ "$NO_CHANGES" == "true" ]; then
             echo "No changes to commit."
             echo "No changes detected. Failing the pipeline."
-            echo ":x: No changes to commit for $APP_NAME in stage from $UPDATED_FILES. No changes detected. Failing the pipeline. :x:" >> $GITHUB_STEP_SUMMARY
+            echo ":x: No changes to commit for $APP_NAME in stage :x:" >> $GITHUB_STEP_SUMMARY
           fi
           if [ "$PUSH_FAILED" == "true" ]; then
             echo ":x: Git push failed for $APP_NAME in stage from $UPDATED_FILES. Details below: :x:" >> $GITHUB_STEP_SUMMARY
