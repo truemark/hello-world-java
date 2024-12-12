@@ -77,6 +77,7 @@ jobs:
             exit 1
           else
             git diff --staged > ../diff_output.txt
+            cat ../diff_output.txt || echo "Failed to generate diff_output.txt" && exit 1
             git commit -m "Update deployment values for stage from ${{ env.UPDATED_FILES }}"
             git push origin main
             if [[ $? -ne 0 ]]; then
@@ -84,14 +85,6 @@ jobs:
               exit 1
             fi
           fi
-          
-          ls -lah
-          pwd
-
-      - name: Debugging
-        run: |
-          ls -lah
-          pwd
 
       - name: Failure Summary
         if: env.NO_CHANGES == 'true' || env.PUSH_FAILED == 'true' || failure() && steps.copy-updates.outcome == 'failure'
