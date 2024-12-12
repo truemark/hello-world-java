@@ -76,7 +76,7 @@ jobs:
             echo "NO_CHANGES=true" >> $GITHUB_ENV
             exit 1
           else
-            git diff --staged > git_diff_output.txt
+            git diff --staged > ${{ github.workspace }}/git_diff_output.txt
             git commit -m "Update deployment values for stage from ${{ env.UPDATED_FILES }}"
             git push origin main
             if [[ $? -ne 0 ]]; then
@@ -85,11 +85,6 @@ jobs:
             fi
           fi
 
-      - name: Debugging git_diff_output.txt
-        run: |
-          ls -lah
-          cat k8s-deployments/git_diff_output.txt
-
       - name: Failure Summary
         if: env.NO_CHANGES == 'true' || env.PUSH_FAILED == 'true' || failure() && steps.copy-updates.outcome == 'failure'
         env:
@@ -97,7 +92,6 @@ jobs:
           UPDATED_FILES: ${{ env.UPDATED_FILES }}
         run: |
           if [ "$NO_CHANGES" == "true" ]; then
-            echo "No changes to commit."
             echo "No changes detected. Failing the pipeline."
             echo ":x: No changes to commit for $APP_NAME in stage :x:" >> $GITHUB_STEP_SUMMARY
           fi
@@ -107,11 +101,6 @@ jobs:
             echo "```" >> $GITHUB_STEP_SUMMARY
             cat git_push_output.txt >> $GITHUB_STEP_SUMMARY
             echo "```" >> $GITHUB_STEP_SUMMARY
-            echo "### Additional Debug Info:" >> $GITHUB_STEP_SUMMARY
-            echo "Remote Info:" >> $GITHUB_STEP_SUMMARY
-            git remote -v >> $GITHUB_STEP_SUMMARY
-            echo "HEAD Commit:" >> $GITHUB_STEP_SUMMARY
-            git log -1 --oneline >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Successful Summary
