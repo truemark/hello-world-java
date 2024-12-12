@@ -1,0 +1,8 @@
+on:
+  push:
+    paths:
+      - 'kubernetes/prod/**'
+    branches:
+      - main
+      - hotfix/*
+  workflow_dispatch:

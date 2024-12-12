@@ -1,0 +1,5 @@
+on:
+push:
+  paths:
+    - 'kubernetes/stage/**'
+workflow_dispatch:                  cl
