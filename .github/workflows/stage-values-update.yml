@@ -52,6 +52,7 @@ jobs:
           path: k8s-deployments
 
       - name: Copy Updates to Deployment Repo
+        id: copy-updates
         env:
           APP_NAME: ${{ env.APP_NAME }}
           UPDATED_FILES: ${{ env.UPDATED_FILES }}
@@ -60,11 +61,39 @@ jobs:
           cd k8s-deployments
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
           git add environments/stage/${{ env.APP_NAME }}/$(basename ${{ env.UPDATED_FILES }})
+          if git diff-index --quiet HEAD; then
+          echo "No changes to commit."
+          echo "NO_CHANGES=true" >> $GITHUB_ENV
+          else
           git commit -m "Update deployment values for stage from ${{ env.UPDATED_FILES }}"
-          git push origin main
+          git push origin main > git_push_output.txt 2>&1 || {
+           echo "PUSH_FAILED=true" >> $GITHUB_ENV
+           echo "Git push failed. See output:" >> git_push_output.txt
+           cat git_push_output.txt
+           exit 1
+          }
+          fi
 
-      - name: Set Summary of Changes
+      - name: Failure Summary
+        if: env.NO_CHANGES == 'true' || env.PUSH_FAILED == 'true'
+        env:
+          APP_NAME: ${{ env.APP_NAME }}
+          UPDATED_FILES: ${{ env.UPDATED_FILES }}
+        run: |
+          if [ "$NO_CHANGES" == "true" ]; then
+            echo ":x: No changes to commit for $APP_NAME in stage from $UPDATED_FILES :x:" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "$PUSH_FAILED" == "true" ]; then
+            echo ":x: Git push failed for $APP_NAME in stage from $UPDATED_FILES. Details below: :x:" >> $GITHUB_STEP_SUMMARY
+            echo "```" >> $GITHUB_STEP_SUMMARY
+            cat k8s-deployments/git_push_output.txt >> $GITHUB_STEP_SUMMARY
+            echo "```" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Successful Summary
+        if: env.NO_CHANGES == 'false' || env.PUSH_FAILED == 'false'
         env:
           APP_NAME: ${{ env.APP_NAME }}
           UPDATED_FILES: ${{ env.UPDATED_FILES }}
