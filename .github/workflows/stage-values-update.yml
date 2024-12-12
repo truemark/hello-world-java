@@ -68,6 +68,8 @@ jobs:
             echo "NO_CHANGES=true" >> $GITHUB_ENV
           else
             git diff --staged > git_diff_output.txt
+            echo "Changes captured:"
+            cat git_diff_output.txt
             git commit -m "Update deployment values for stage from ${{ env.UPDATED_FILES }}"
             git push origin main > git_push_output.txt 2>&1 || {
               echo "PUSH_FAILED=true" >> $GITHUB_ENV
@@ -77,6 +79,7 @@ jobs:
             }
             echo "NO_CHANGES=false" >> $GITHUB_ENV
           fi
+
 
       - name: Failure Summary
         if: env.NO_CHANGES == 'true' || env.PUSH_FAILED == 'true'
@@ -101,10 +104,14 @@ jobs:
           UPDATED_FILES: ${{ env.UPDATED_FILES }}
         run: |
           echo ":thumbsup: Updated values for $APP_NAME in stage from $UPDATED_FILES :thumbsup:" >> $GITHUB_STEP_SUMMARY
-          echo "### Changes Made:" >> $GITHUB_STEP_SUMMARY
-          echo "```diff" >> $GITHUB_STEP_SUMMARY
-          cat k8s-deployments/git_diff_output.txt >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+          if [ -f k8s-deployments/git_diff_output.txt ]; then
+            echo "### Changes Made:" >> $GITHUB_STEP_SUMMARY
+            echo "```diff" >> $GITHUB_STEP_SUMMARY
+            cat k8s-deployments/git_diff_output.txt >> $GITHUB_STEP_SUMMARY
+            echo "```" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No changes detected in the diff output." >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
