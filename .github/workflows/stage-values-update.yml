@@ -131,7 +131,7 @@ jobs:
           fi
 
       - name: Poll application status
-        if: env.NO_CHANGES != 'true' && env.PUSH_FAILED != 'true'
+        if: env.NO_CHANGES != 'true' && env.PUSH_FAILED != 'true' && steps.failure-summary.outcome != 'success'
         env:
           APP_NAME: ${{ env.APP_NAME }}
         run: |
