@@ -93,7 +93,7 @@ jobs:
 #          echo ${{ github.workspace }}
 
       - name: Failure Summary
-        if: env.NO_CHANGES == 'true' || env.PUSH_FAILED == 'true' || steps.copy-updates.outcome == 'failure'
+        if: env.NO_CHANGES == 'true' || env.PUSH_FAILED == 'true' || failure() && steps.copy-updates.outcome == 'failure'
         env:
           APP_NAME: ${{ env.APP_NAME }}
           UPDATED_FILES: ${{ env.UPDATED_FILES }}
