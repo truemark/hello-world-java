@@ -84,6 +84,14 @@ jobs:
               exit 1
             fi
           fi
+          
+          ls -lah
+          pwd
+
+      - name: Debugging
+        run: |
+          ls -lah
+          pwd
 
       - name: Failure Summary
         if: env.NO_CHANGES == 'true' || env.PUSH_FAILED == 'true' || failure() && steps.copy-updates.outcome == 'failure'
