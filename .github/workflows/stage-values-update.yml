@@ -79,6 +79,10 @@ jobs:
             }
             echo "NO_CHANGES=false" >> $GITHUB_ENV
           fi
+          
+          ls -lah
+          ls -lah kubernetes
+          ls -lah kubernetes/stage
 
 
       - name: Failure Summary
