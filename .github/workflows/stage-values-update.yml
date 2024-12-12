@@ -76,7 +76,7 @@ jobs:
             echo "NO_CHANGES=true" >> $GITHUB_ENV
             exit 1
           else
-            git diff --staged > ${{ github.workspace }}/git_diff_output.txt
+            git diff --staged > ../diff_output.txt
             git commit -m "Update deployment values for stage from ${{ env.UPDATED_FILES }}"
             git push origin main
             if [[ $? -ne 0 ]]; then
@@ -109,10 +109,10 @@ jobs:
           APP_NAME: ${{ env.APP_NAME }}
           UPDATED_FILES: ${{ env.UPDATED_FILES }}
         run: |
-          if [ -f git_diff_output.txt ]; then
+          if [ -f diff_output.txt ]; then
             echo "### Changes Made:" >> $GITHUB_STEP_SUMMARY
             echo "```diff" >> $GITHUB_STEP_SUMMARY
-            cat git_diff_output.txt >> $GITHUB_STEP_SUMMARY
+            cat diff_output.txt >> $GITHUB_STEP_SUMMARY
             echo "```" >> $GITHUB_STEP_SUMMARY
           else
             echo "No changes detected in the diff output." >> $GITHUB_STEP_SUMMARY
