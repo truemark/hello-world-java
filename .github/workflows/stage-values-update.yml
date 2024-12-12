@@ -66,7 +66,7 @@ jobs:
           done
           
           cd k8s-deployments
-          git add "environments/stage/${{ env.APP_NAME }}/"
+          git add -- "environments/stage/${{ env.APP_NAME }}/"
           
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -76,7 +76,7 @@ jobs:
             echo "NO_CHANGES=true" >> $GITHUB_ENV
             exit 1
           else
-            git diff --staged > echo git_diff_output.txt
+            git diff --staged > git_diff_output.txt
             git commit -m "Update deployment values for stage from ${{ env.UPDATED_FILES }}"
             git push origin main
             if [[ $? -ne 0 ]]; then
@@ -84,13 +84,6 @@ jobs:
               exit 1
             fi
           fi
-
-#      - name: Debugging Step
-#        run: |
-#          echo "Checking if git_diff_output.txt exists..."
-#          ls -al
-#          pwd
-#          echo ${{ github.workspace }}
 
       - name: Failure Summary
         if: env.NO_CHANGES == 'true' || env.PUSH_FAILED == 'true' || failure() && steps.copy-updates.outcome == 'failure'
