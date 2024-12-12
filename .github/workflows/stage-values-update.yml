@@ -129,6 +129,7 @@ jobs:
           kubectl-enabled: true
 
       - name: Poll application status
+        if: env.NO_CHANGES != 'true' && env.PUSH_FAILED != 'true'
         env:
           APP_NAME: ${{ env.APP_NAME }}
         run: |
