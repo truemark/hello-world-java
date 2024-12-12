@@ -125,7 +125,7 @@ jobs:
           if [ -f git_diff_output.txt ]; then
             echo "### Changes Made:" >> $GITHUB_STEP_SUMMARY
             echo "```diff" >> $GITHUB_STEP_SUMMARY
-            cat ../git_diff_output.txt >> $GITHUB_STEP_SUMMARY
+            cat git_diff_output.txt >> $GITHUB_STEP_SUMMARY
             echo "```" >> $GITHUB_STEP_SUMMARY
           else
             echo "No changes detected in the diff output." >> $GITHUB_STEP_SUMMARY
