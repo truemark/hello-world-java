@@ -86,6 +86,16 @@ jobs:
             fi
           fi
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: "${{ vars.AWS_ASSUME_ROLE_DEPLOY }}"
+          aws-region: us-east-2
+
+      - name: EKS cluster login
+        run: |
+          aws eks update-kubeconfig --region us-east-2 --name ${{ vars.CLUSTER_NAME }}
+
       - name: Failure Summary
         if: env.NO_CHANGES == 'true' || env.PUSH_FAILED == 'true' || failure() && steps.copy-updates.outcome == 'failure'
         env:
@@ -110,8 +120,6 @@ jobs:
           APP_NAME: ${{ env.APP_NAME }}
           UPDATED_FILES: ${{ env.UPDATED_FILES }}
         run: |
-          ls -la
-          pwd
           if [ -f ./diff_output.txt ]; then
             echo "### Changes Made:" >> $GITHUB_STEP_SUMMARY
             echo "```diff" >> $GITHUB_STEP_SUMMARY
@@ -120,16 +128,6 @@ jobs:
           else
             echo "No changes detected in the diff output." >> $GITHUB_STEP_SUMMARY
           fi
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: "${{ vars.AWS_ASSUME_ROLE_DEPLOY }}"
-          aws-region: us-east-2
-
-      - name: EKS cluster login
-        run: |
-          aws eks update-kubeconfig --region us-east-2 --name ${{ vars.CLUSTER_NAME }}
 
       - name: Poll application status
         if: env.NO_CHANGES != 'true' && env.PUSH_FAILED != 'true'
