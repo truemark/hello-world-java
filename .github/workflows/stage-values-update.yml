@@ -64,30 +64,25 @@ jobs:
           for file in ${{ env.UPDATED_FILES }}; do
             cp "$file" "k8s-deployments/environments/stage/${{ env.APP_NAME }}/"
           done
-
+          
           cd k8s-deployments
           git add "environments/stage/${{ env.APP_NAME }}/"
-
+          
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
+          
           if git diff-index --quiet HEAD; then
             echo "No changes to commit."
             echo "NO_CHANGES=true" >> $GITHUB_ENV
-            echo "No changes detected. Failing the pipeline."
             exit 1
           else
-            git diff --staged > git_diff_output.txt
-            echo "Changes captured:"
-            cat git_diff_output.txt
+            git diff --staged > ../git_diff_output.txt
             git commit -m "Update deployment values for stage from ${{ env.UPDATED_FILES }}"
             git push origin main
             if [[ $? -ne 0 ]]; then
               echo "PUSH_FAILED=true" >> $GITHUB_ENV
-              echo "Git push failed after retries."
               exit 1
             fi
-            echo "NO_CHANGES=false" >> $GITHUB_ENV
           fi
 
       - name: Failure Summary
