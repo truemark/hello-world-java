@@ -1,8 +1,10 @@
+name: Values Only Update - Stage
 on:
   push:
+    workflow_dispatch:
     paths:
       - 'kubernetes/prod/**'
     branches:
       - main
       - hotfix/*
-  workflow_dispatch:
+

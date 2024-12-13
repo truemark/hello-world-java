@@ -5,6 +5,10 @@ on:
     paths:
       - 'kubernetes/stage/**'
 
+permissions:
+  id-token: write
+  contents: write
+
 jobs:
   values-update-stage:
     name: Update Values in Deployment Repo
