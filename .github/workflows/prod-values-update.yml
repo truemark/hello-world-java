@@ -1,10 +1,18 @@
-name: Values Only Update - Stage
+name: Values Only Update - Prod
 on:
+  workflow_dispatch:
   push:
-    workflow_dispatch:
     paths:
       - 'kubernetes/prod/**'
-    branches:
-      - main
-      - hotfix/*
 
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  values-update-stage:
+    name: Update Values in Deployment Repo
+    uses: truemark/github-workflows/.github/workflows/prod-values-update.yml@argocd-demo
+    secrets:
+      app_id: ${{ secrets.RELEASE_BOT_ID }}
+      private_key: ${{ secrets.RELEASE_BOT_KEY }}
