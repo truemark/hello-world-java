@@ -1,15 +1,11 @@
 name: Values Only Update - Stage
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'kubernetes/stage/**'
-  workflow_dispatch:
 
 jobs:
   values-update-stage:
-    name: Deploy Values to Stage
-    runs-on: ubuntu-latest
-    environment: stage
-    steps:
-      - name: Update Values in Deployment Repo
-        uses: truemark/github-workflows/.github/workflows/stage-values-update.yml@argocd-demo
+    name: Update Values in Deployment Repo
+    uses: truemark/github-workflows/.github/workflows/stage-values-update.yml@argocd-demo
