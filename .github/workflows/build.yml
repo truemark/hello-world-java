@@ -71,7 +71,7 @@ jobs:
     needs: [ build-docker, cdk-deploy-stage ]
 
   cdk-diff-prod:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')  || github.event_name == 'pull_request'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: CDK diff to Prod
     uses: truemark/github-workflows/.github/workflows/cdk-diff.yml@argocd-demo
     with:
@@ -82,7 +82,7 @@ jobs:
     needs: [ cdk-deploy-stage ]
 
   cdk-deploy-prod:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/') || github.event_name == 'pull_request'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: CDK deploy to Prod
     uses: truemark/github-workflows/.github/workflows/cdk-deploy.yml@argocd-demo
     with:
@@ -93,7 +93,7 @@ jobs:
     needs: [ cdk-diff-prod ]
 
   eks-deploy-prod:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/') || github.event_name == 'pull_request'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: ArgoCD deploy to Prod
     uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
     with:
@@ -102,4 +102,4 @@ jobs:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
       app-id: ${{ secrets.RELEASE_BOT_ID }}
       private-key: ${{ secrets.RELEASE_BOT_KEY }}
-    needs: [ eks-deploy-stage ]
+    needs: [ cdk-diff-stage, cdk-deploy-stage, eks-deploy-stage ]
