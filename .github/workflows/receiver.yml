@@ -2,8 +2,7 @@ name: Receiver Workflow
 
 on:
   workflow_run:
-    workflows:
-      - Trigger Workflow
+    workflows: [Trigger Workflow]
     types:
       - completed
     branches:
