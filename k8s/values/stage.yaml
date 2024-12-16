@@ -1,0 +1,16 @@
+istio:
+  virtualServices:
+    enabled: true
+    spec:
+      default-route:
+        hosts:
+          - hello.stage.truemark.io
+        gateways:
+          - istio-ingress/external
+        http:
+          - name: hello-world
+            route:
+              - destination:
+                  host: hello-world
+                  port:
+                    number: 80

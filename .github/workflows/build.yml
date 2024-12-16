@@ -1,3 +1,4 @@
+name: "Build & Deploy"
 on:
   workflow_dispatch:
   push:
@@ -20,7 +21,7 @@ jobs:
   build-docker:
     name: Build Docker
     uses: ./.github/workflows/build-docker.yml
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' ||startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' ||startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
     with:
       version: 61.${{ github.run_number }}.${{ github.run_attempt }}
       image_name: "truemark/helloworld-java"
@@ -31,7 +32,7 @@ jobs:
     needs: [ build-maven ]
 
   cdk-diff-stage:
-    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
     name: CDK diff to Stage
     uses: ./.github/workflows/cdk-diff.yml
     with:
@@ -41,7 +42,7 @@ jobs:
     needs: [ build-maven, build-docker ]
 
   cdk-deploy-stage:
-    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
     name: CDK deploy to Stage
     uses: ./.github/workflows/cdk-deploy.yml
     with:
@@ -51,15 +52,19 @@ jobs:
     needs: [ cdk-diff-stage ]
 
   eks-deploy-stage:
-    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
     name: EKS deploy to Stage
     uses: ./.github/workflows/eks-deploy.yml
     with:
       environment: "stage"
+    secrets:
+      app-id: ${{ secrets.RELEASE_BOT_ID }}
+      private-key: ${{ secrets.RELEASE_BOT_KEY }}
+
     needs: [ cdk-deploy-stage ]
 
   cdk-diff-prod:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
     name: CDK diff to Prod
     uses: ./.github/workflows/cdk-diff.yml
     with:
@@ -69,7 +74,7 @@ jobs:
     needs: [ build-maven, build-docker ]
 
   cdk-deploy-prod:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
     name: CDK deploy to Prod
     uses: ./.github/workflows/cdk-deploy.yml
     with:
@@ -79,11 +84,13 @@ jobs:
     needs: [ cdk-diff-prod ]
 
   eks-deploy-prod:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd'
     name: EKS deploy to Prod
     uses: ./.github/workflows/eks-deploy.yml
     with:
       environment: "prod"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
+      app-id: ${{ secrets.RELEASE_BOT_ID }}
+      private-key: ${{ secrets.RELEASE_BOT_KEY }}
     needs: [ cdk-deploy-prod ]

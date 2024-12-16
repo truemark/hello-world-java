@@ -1,0 +1,166 @@
+name: Prod Values Update
+
+on:
+  push:
+    paths:
+      - 'kubernetes/prod/**'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  stage-values-update:
+    name: Update Values for Prod
+    runs-on: ubuntu-latest
+    environment: prod
+    outputs:
+      APP_NAME: ${{ steps.setup-environment.outputs.APP_NAME }}
+      UPDATED_FILES: ${{ steps.setup-environment.outputs.UPDATED_FILES }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Environment
+        id: setup-environment
+        run: |
+          UPDATED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^kubernetes/')
+          if [[ -z "$UPDATED_FILES" ]]; then
+            echo "No files were updated. Exiting."
+            exit 1
+          fi
+          echo $UPDATED_FILES > updated_files.txt
+          echo "UPDATED_FILES=$(cat updated_files.txt)" >> $GITHUB_ENV
+          echo "APP_NAME=hello-world" >> $GITHUB_ENV
+
+      - name: Install Kubectl and YQ
+        uses: truemark/kubectl-action@converting-to-typescript
+        with:
+          yq-enabled: true
+          kubectl-enabled: true
+
+      - name: Generate token
+        id: app-token
+        uses: getsentry/action-github-app-token@v3
+        with:
+          app_id: ${{ secrets.RELEASE_BOT_ID }}
+          private_key: ${{ secrets.RELEASE_BOT_KEY }}
+
+      - name: Checkout Deployment Repo
+        uses: actions/checkout@v4
+        with:
+          repository: truemark/k8s-deployments
+          token: ${{ steps.app-token.outputs.token }}
+          path: k8s-deployments
+
+      - name: Copy Updates to Deployment Repo
+        id: copy-updates
+        env:
+          APP_NAME: ${{ env.APP_NAME }}
+          UPDATED_FILES: ${{ env.UPDATED_FILES }}
+        run: |
+          for file in ${{ env.UPDATED_FILES }}; do
+            cp "$file" "k8s-deployments/environments/prod/${{ env.APP_NAME }}/"
+          done
+          
+          cd k8s-deployments
+          git add -- "environments/prod/${{ env.APP_NAME }}/"
+          
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          if git diff-index --quiet HEAD; then
+            echo "No changes to commit."
+            echo "NO_CHANGES=true" >> $GITHUB_ENV
+            exit 1
+          else
+            git diff --staged > ../diff_output.txt
+            cat ../diff_output.txt || echo "Failed to generate diff_output.txt"
+            git commit -m "Update deployment values for prod from ${{ env.UPDATED_FILES }}"
+            git push origin main
+            if [[ $? -ne 0 ]]; then
+              echo "PUSH_FAILED=true" >> $GITHUB_ENV
+              exit 1
+            fi
+          fi
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: "${{ vars.AWS_ASSUME_ROLE_DEPLOY }}"
+          aws-region: us-east-2
+
+      - name: EKS cluster login
+        run: |
+          aws eks update-kubeconfig --region us-east-2 --name ${{ vars.CLUSTER_NAME }}
+
+      - name: Failure Summary
+        if: env.NO_CHANGES == 'true' || env.PUSH_FAILED == 'true' || failure() && steps.copy-updates.outcome == 'failure'
+        env:
+          APP_NAME: ${{ env.APP_NAME }}
+          UPDATED_FILES: ${{ env.UPDATED_FILES }}
+        run: |
+          if [ "$NO_CHANGES" == "true" ]; then
+            echo "No changes detected. Failing the pipeline."
+            echo ":x: No changes to found for $APP_NAME in prod :x:" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "$PUSH_FAILED" == "true" ]; then
+            echo ":x: Git push failed for $APP_NAME in prod from $UPDATED_FILES. Details below: :x:" >> $GITHUB_STEP_SUMMARY
+            echo "### Git Push Output" >> $GITHUB_STEP_SUMMARY
+            echo "```" >> $GITHUB_STEP_SUMMARY
+            cat git_push_output.txt >> $GITHUB_STEP_SUMMARY
+            echo "```" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Successful Summary
+        if: env.NO_CHANGES != 'true' && env.PUSH_FAILED != 'true'
+        env:
+          APP_NAME: ${{ env.APP_NAME }}
+          UPDATED_FILES: ${{ env.UPDATED_FILES }}
+        run: |
+          if [ -f ./diff_output.txt ]; then
+            {
+              echo '### Changes Applied:';
+              echo '';
+              echo '```diff';
+              cat ./diff_output.txt;
+              echo '```';
+            } >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No changes detected in the diff output." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Poll application status
+        if: env.NO_CHANGES != 'true' && env.PUSH_FAILED != 'true' && steps.failure-summary.outcome != 'success'
+        env:
+          APP_NAME: ${{ env.APP_NAME }}
+        run: |
+          echo "Polling application status for $APP_NAME..."
+          INITIAL_CHECK_DONE=false
+          MAX_ATTEMPTS=30
+          ATTEMPT=0
+          while [[ $ATTEMPT -lt $MAX_ATTEMPTS ]]; do
+            STATUS=$(kubectl get -n argocd application/$APP_NAME -o jsonpath='{.status.sync.status}')
+            HEALTH=$(kubectl get -n argocd application/$APP_NAME -o jsonpath='{.status.health.status}')
+            echo "$(date): Sync status: $STATUS, Health status: $HEALTH"
+            if [[ "$INITIAL_CHECK_DONE" == "false" ]]; then
+              if [[ "$STATUS" != "Synced" || "$HEALTH" != "Healthy" ]]; then
+                INITIAL_CHECK_DONE=true
+              fi
+            else
+              if [[ "$STATUS" == "Synced" && "$HEALTH" == "Healthy" ]]; then
+                echo "Application $APP_NAME successfully synced and healthy."
+                break
+              fi
+            fi
+            ATTEMPT=$((ATTEMPT + 1))
+            echo "Attempt $ATTEMPT/$MAX_ATTEMPTS complete. Retrying in 10 seconds..."
+            sleep 10
+          done
+          if [[ $ATTEMPT -ge $MAX_ATTEMPTS ]]; then
+            echo "Reached maximum attempts ($MAX_ATTEMPTS). Exiting with failure."
+            exit 1
+          fi
+          kubectl get -n argocd events --field-selector involvedObject.name=$APP_NAME --sort-by='.metadata.creationTimestamp' -o wide | tail -n 5

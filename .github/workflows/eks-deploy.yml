@@ -4,6 +4,12 @@ on:
       aws_assume_role:
         description: "AWS role to assume"
         required: false
+      app-id:
+        description: "App Id"
+        required: true
+      private-key:
+        description: "Private Key"
+        required: true
     inputs:
       environment:
         description: "Environment to deploy to"
@@ -13,12 +19,12 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    container: # Replace with GitHub action in the future
-      image: public.ecr.aws/truemark/aws-cdk:ubuntu
+#    container: # Replace with GitHub action in the future
+#      image: public.ecr.aws/truemark/aws-cdk:ubuntu
     environment: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: image-tag
 
@@ -28,36 +34,152 @@ jobs:
           # TODO Convert to secret
           role-to-assume: "${{ vars.AWS_ASSUME_ROLE_DEPLOY }}"
           aws-region: "us-east-2"
-#      - name: CDK Deploy
-#        run: |
-#          cd cdk
-#          pnpm i --frozen-lockfile
-#          cdk -c env=${{ inputs.environment }} deploy --require-approval never
-
-      # TODO Get rid of separate role
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: "${{ vars.AWS_ASSUME_ROLE_DEPLOY }}"
-          aws-region: "us-east-2"
 
       - name: Get Docker Image Tag
         shell: bash
         run: | 
           echo "IMAGE_TAG=$(cat image-tag.txt)" >> $GITHUB_ENV
+          echo "APP_NAME=hello-world" >> $GITHUB_ENV
 
-      - name: Setup Cluster Access
+      - name: EKS cluster login
         run: |
-          aws eks update-kubeconfig --name ${{ vars.CLUSTER_NAME }} --kubeconfig ./kubeconfig
-          echo 'KUBE_CONFIG_DATA<<EOF' >> $GITHUB_ENV
-          echo $(cat ./kubeconfig | base64) >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
-        env:
-          AWS_REGION: "us-east-2"
+          aws eks update-kubeconfig --region us-east-2 --name ${{ vars.CLUSTER_NAME }}
 
-      - name: Helm Deploy
-        uses: koslib/helm-eks-action@v1.28.0
-        env:
-          KUBE_CONFIG_DATA: ${{ env.KUBE_CONFIG_DATA }}
+      - name: Install kubectl and yq
+        uses: truemark/kubectl-action@converting-to-typescript
         with:
-          command: helm upgrade --install -n hello-world --create-namespace --wait --atomic --set image.tag=$IMAGE_TAG -f helm-chart/hello-world/values.yaml hello-world helm-chart/hello-world
+          yq-enabled: true
+          kubectl-enabled: true
+
+      - name: Generate token
+        id: app-token
+        uses: getsentry/action-github-app-token@v3
+        with:
+          app_id: ${{ secrets.app-id }}
+          private_key: ${{ secrets.private-key }}
+
+      - name: Checkout tools repo
+        uses: actions/checkout@v4
+        with:
+          repository: truemark/k8s-deployments
+          token: ${{ steps.app-token.outputs.token }}
+          path: k8s-deployments
+
+      - name: Update image tag in values.yaml
+        id: copy-updates
+        env:
+          APP_NAME: ${{ env.APP_NAME }}
+        run: |
+          APP_FILE="k8s/hello-world.yaml"
+          ENVIRONMENT="${{ inputs.environment }}"
+          sed -i "s/{{environment}}/${ENVIRONMENT}/g" $APP_FILE
+          echo "Checking if ArgoCD Application ${{ env.APP_NAME }} exists..."
+          kubectl apply -f $APP_FILE
+          yq eval ".deployment.image.tag = \"$IMAGE_TAG\"" -i k8s/values/${{ inputs.environment }}.yaml
+          cp -r k8s/values/values.yaml k8s-deployments/environments/${{ inputs.environment }}/hello-world/values.yaml
+          cp -r k8s/values/${{ inputs.environment }}.yaml k8s-deployments/environments/${{ inputs.environment }}/hello-world/${{ inputs.environment }}.yaml
+          cd k8s-deployments
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add environments/${{ inputs.environment }}
+          git diff --staged > ../image_diff_output.txt
+          git commit -m "Update image tag to $IMAGE_TAG"
+          git push origin main
+          if [[ $? -ne 0 ]]; then
+            echo "PUSH_FAILED=true" >> $GITHUB_ENV
+            exit 1
+          fi
+
+      - name: Failure Summary
+        if: env.PUSH_FAILED == 'true' || failure() && steps.copy-updates.outcome == 'failure'
+        env:
+          APP_NAME: ${{ env.APP_NAME }}
+        run: |
+          if [ "$PUSH_FAILED" == "true" ]; then
+            echo ":x: Git push failed for $APP_NAME :x:" >> $GITHUB_STEP_SUMMARY
+            echo "### Git Push Output" >> $GITHUB_STEP_SUMMARY
+            echo "```" >> $GITHUB_STEP_SUMMARY
+            cat git_push_output.txt >> $GITHUB_STEP_SUMMARY
+            echo "```" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Successful Summary
+        if: env.PUSH_FAILED != 'true'
+        env:
+          APP_NAME: ${{ env.APP_NAME }}
+        run: |
+          if [ -f ./image_diff_output.txt ]; then
+            {
+              echo '### Changes Applied:';
+              echo '';
+              echo '```diff';
+              cat ./image_diff_output.txt;
+              echo '```';
+            } >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No changes detected in the diff output." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Poll application status
+        if: env.PUSH_FAILED != 'true' && steps.failure-summary.outcome != 'success'
+        env:
+          APP_NAME: hello-world
+        run: |
+          echo "Polling application status for $APP_NAME..."
+          
+          INITIAL_CHECK_DONE=false
+          MAX_ATTEMPTS=30
+          ATTEMPT=0
+          
+          while [[ $ATTEMPT -lt $MAX_ATTEMPTS ]]; do
+          STATUS=$(kubectl get -n argocd application/$APP_NAME -o jsonpath='{.status.sync.status}')
+          HEALTH=$(kubectl get -n argocd application/$APP_NAME -o jsonpath='{.status.health.status}')
+          echo "$(date): Sync status: $STATUS, Health status: $HEALTH"
+        
+          # Ignore the initial Healthy/Synced state
+          if [[ "$INITIAL_CHECK_DONE" == "false" ]]; then
+          echo "Ignoring initial status: Sync=$STATUS, Health=$HEALTH"
+          if [[ "$STATUS" != "Synced" || "$HEALTH" != "Healthy" ]]; then
+          INITIAL_CHECK_DONE=true
+          fi
+          else
+          # Check for successful sync and healthy state
+          if [[ "$STATUS" == "Synced" && "$HEALTH" == "Healthy" ]]; then
+          echo "Application $APP_NAME successfully synced and healthy."
+          break
+          fi
+          fi
+        
+          # Increment the attempt counter
+          ATTEMPT=$((ATTEMPT + 1))
+          echo "Attempt $ATTEMPT/$MAX_ATTEMPTS complete. Retrying in 10 seconds..."
+        
+          # Wait for 10 seconds before polling again
+          sleep 10
+          done
+          
+          if [[ $ATTEMPT -ge $MAX_ATTEMPTS ]]; then
+          echo "Reached maximum attempts ($MAX_ATTEMPTS). Exiting with failure."
+          exit 1
+          fi
+          
+          echo "Recent events for $APP_NAME:"
+          kubectl get -n argocd events --field-selector involvedObject.name=$APP_NAME --sort-by='.metadata.creationTimestamp' -o wide | tail -n 5
+          
+
+
+#      - name: Setup Cluster Access
+#        run: |
+#          aws eks update-kubeconfig --name ${{ vars.CLUSTER_NAME }} --kubeconfig ./kubeconfig
+#          echo 'KUBE_CONFIG_DATA<<EOF' >> $GITHUB_ENV
+#          echo $(cat ./kubeconfig | base64) >> $GITHUB_ENV
+#          echo 'EOF' >> $GITHUB_ENV
+#        env:
+#          AWS_REGION: "us-east-2"
+#
+#      - name: Helm Deploy
+#        uses: koslib/helm-eks-action@v1.28.0
+#        env:
+#          KUBE_CONFIG_DATA: ${{ env.KUBE_CONFIG_DATA }}
+#        with:
+#          command: helm upgrade --install -n hello-world --create-namespace --wait --atomic --set image.tag=$IMAGE_TAG -f helm-chart/hello-world/values.yaml hello-world helm-chart/hello-world
