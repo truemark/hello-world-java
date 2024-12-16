@@ -26,7 +26,9 @@ jobs:
   build-docker:
     name: Build Docker
     uses: truemark/github-workflows/.github/workflows/build-docker.yml@argocd-demo
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.event_name == 'pull_request'
+    if: >
+      github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd-louie') ||
+      (github.event_name == 'pull_request' && (github.base_ref == 'main' || github.base_ref == 'develop' || startsWith(github.base_ref, 'hotfix/')))
     with:
       version: 61.${{ github.run_number }}.${{ github.run_attempt }}
       image_name: "truemark/helloworld-java"
@@ -38,7 +40,9 @@ jobs:
     needs: [ build-maven ]
 
   cdk-diff-stage:
-    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.event_name == 'pull_request'
+    if: >
+      github.event_name == 'push' && (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd-louie') ||
+      (github.event_name == 'pull_request' && (github.base_ref == 'develop' || startsWith(github.base_ref, 'hotfix/')))
     name: CDK diff to Stage
     uses: truemark/github-workflows/.github/workflows/cdk-diff.yml@argocd-demo
     with:
@@ -49,7 +53,9 @@ jobs:
     needs: [ build-maven ]
 
   cdk-deploy-stage:
-    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.event_name == 'pull_request'
+    if: >
+      github.event_name == 'push' && (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd-louie') ||
+      (github.event_name == 'pull_request' && (github.base_ref == 'develop' || startsWith(github.base_ref, 'hotfix/')))
     name: CDK deploy to Stage
     uses: truemark/github-workflows/.github/workflows/cdk-deploy.yml@argocd-demo
     with:
@@ -60,7 +66,9 @@ jobs:
     needs: [ cdk-diff-stage ]
 
   eks-deploy-stage:
-    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.event_name == 'pull_request'
+    if: >
+      github.event_name == 'push' && (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.ref == 'refs/heads/feat/argocd-louie') ||
+      (github.event_name == 'pull_request' && (github.base_ref == 'develop' || startsWith(github.base_ref, 'hotfix/')))
     name: ArgoCD deploy to Stage
     uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
     with:
