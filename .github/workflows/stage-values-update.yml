@@ -1,16 +1,10 @@
 name: Stage Values Update
 
-  on:
-    push:
-      branches:
-        - main
-        - develop
-        - hotfix/*
-      paths:
-        - 'kubernetes/**'  # Include the specific path
-      paths-ignore:
-        - 'src/**'            # Exclude the src/* path
-    workflow_dispatch:
+on:
+  push:
+    paths:
+      - 'kubernetes/stage/**'
+  workflow_dispatch:
 
 permissions:
   id-token: write
