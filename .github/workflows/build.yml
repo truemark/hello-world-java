@@ -26,7 +26,7 @@ jobs:
   build-docker:
     name: Build Docker
     uses: truemark/github-workflows/.github/workflows/build-docker.yml@argocd-demo
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' ||startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.event_name == 'pull_request'
     with:
       version: 61.${{ github.run_number }}.${{ github.run_attempt }}
       image_name: "truemark/helloworld-java"
@@ -38,7 +38,7 @@ jobs:
     needs: [ build-maven ]
 
   cdk-diff-stage:
-    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.event_name == 'pull_request'
     name: CDK diff to Stage
     uses: truemark/github-workflows/.github/workflows/cdk-diff.yml@argocd-demo
     with:
@@ -49,7 +49,7 @@ jobs:
     needs: [ build-maven ]
 
   cdk-deploy-stage:
-    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.event_name == 'pull_request'
     name: CDK deploy to Stage
     uses: truemark/github-workflows/.github/workflows/cdk-deploy.yml@argocd-demo
     with:
@@ -60,7 +60,7 @@ jobs:
     needs: [ cdk-diff-stage ]
 
   eks-deploy-stage:
-    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/hotfix/') || github.event_name == 'pull_request'
     name: ArgoCD deploy to Stage
     uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
     with:
@@ -71,7 +71,7 @@ jobs:
     needs: [ build-docker, cdk-deploy-stage ]
 
   cdk-diff-prod:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/') #
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')  || github.event_name == 'pull_request'
     name: CDK diff to Prod
     uses: truemark/github-workflows/.github/workflows/cdk-diff.yml@argocd-demo
     with:
@@ -82,7 +82,7 @@ jobs:
     needs: [ cdk-deploy-stage ]
 
   cdk-deploy-prod:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/') #
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/') || github.event_name == 'pull_request'
     name: CDK deploy to Prod
     uses: truemark/github-workflows/.github/workflows/cdk-deploy.yml@argocd-demo
     with:
@@ -93,7 +93,7 @@ jobs:
     needs: [ cdk-diff-prod ]
 
   eks-deploy-prod:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/') || github.event_name == 'pull_request'
     name: ArgoCD deploy to Prod
     uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
     with:
