@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'kubernetes/stage/**'
+      - 'k8s/values/stage.yaml'
       - '!.github/**'
 
 permissions:
@@ -12,8 +12,11 @@ permissions:
 
 jobs:
   values-update-stage:
-    name: Update Values in Deployment Repo
-    uses: truemark/github-workflows/.github/workflows/stage-values-update.yml@argocd-demo
+    name: Update Values Only - Stage
+    uses: truemark/github-workflows/.github/workflows/values-only-update.yml@argocd-demo
+    with:
+      app_name: "hello-world"
+      environment: "stage"
     secrets:
       app_id: ${{ secrets.RELEASE_BOT_ID }}
       private_key: ${{ secrets.RELEASE_BOT_KEY }}
