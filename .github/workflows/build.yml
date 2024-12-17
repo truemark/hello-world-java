@@ -18,9 +18,6 @@ jobs:
   build-maven:
     name: Build Maven
     uses: truemark/github-workflows/.github/workflows/build-maven.yml@argocd-demo
-    if: >
-      github.event_name == 'push' && (github.ref == 'refs/heads/main-louie' || github.ref == 'refs/heads/develop-louie' || startsWith(github.ref, 'refs/heads/hotfix/')) || 
-      (github.event_name == 'pull_request' && (github.base_ref == 'main-louie' || github.base_ref == 'develop-louie' || startsWith(github.base_ref, 'hotfix/')))
     with:
       version: 61.${{ github.run_number }}.${{ github.run_attempt }}
       java_version: 21
@@ -29,9 +26,6 @@ jobs:
   build-docker:
     name: Build Docker
     uses: truemark/github-workflows/.github/workflows/build-docker.yml@argocd-demo
-    if: >
-      github.event_name == 'push' && (github.ref == 'refs/heads/main-louie' || github.ref == 'refs/heads/develop-louie' || startsWith(github.ref, 'refs/heads/hotfix/')) ||
-      (github.event_name == 'pull_request' && (github.base_ref == 'main-louie' || github.base_ref == 'develop-louie' || startsWith(github.base_ref, 'hotfix/')))
     with:
       version: 61.${{ github.run_number }}.${{ github.run_attempt }}
       image_name: "truemark/helloworld-java"
@@ -115,4 +109,4 @@ jobs:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
       app-id: ${{ secrets.RELEASE_BOT_ID }}
       private-key: ${{ secrets.RELEASE_BOT_KEY }}
-    needs: [ cdk-diff-stage, cdk-deploy-stage, eks-deploy-stage ]
+    needs: [ build-docker, cdk-deploy-prod ]
