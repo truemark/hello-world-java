@@ -5,6 +5,8 @@ on:
     paths:
       - 'k8s/values/stage.yaml'
       - '!.github/**'
+    branches:
+      - values/stage/*
 
 permissions:
   id-token: write
