@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - 'kubernetes/prod/**'
+    paths-ignore:
+      - .github/**
+
 
 permissions:
   id-token: write
