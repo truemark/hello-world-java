@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'kubernetes/stage/**'
+      - 'k8s/values/stage.yaml'
       - '!.github/**'
 
 permissions:

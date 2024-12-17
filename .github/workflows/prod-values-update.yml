@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'kubernetes/prod/**'
+      - 'k8s/values/prod.yaml'
       - '!.github/**'
 
 
