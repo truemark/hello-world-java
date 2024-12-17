@@ -74,7 +74,7 @@ jobs:
     secrets:
       app-id: ${{ secrets.RELEASE_BOT_ID }}
       private-key: ${{ secrets.RELEASE_BOT_KEY }}
-    needs: [ cdk-deploy-stage ]
+    needs: [ build-docker, cdk-deploy-stage ]
 
   cdk-diff-prod:
     if: >
