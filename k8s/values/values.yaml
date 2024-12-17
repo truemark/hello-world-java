@@ -16,7 +16,7 @@ deployment:
         fieldRef:
           fieldPath: metadata.name
     VAR:
-      value: "test"
+      value: "test12"
     LOG_LEVEL:
       value: "INFO"
   tolerations:
