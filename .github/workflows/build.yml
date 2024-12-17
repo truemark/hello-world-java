@@ -103,6 +103,17 @@ jobs:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ cdk-diff-prod ]
 
+  deploy-values-updates:
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
+    name: Update Prod Deployment Values from Stage
+    uses: truemark/github-workflows/.github/workflows/promote-to-prod.yml@argocd-demo
+    with:
+      app_name: "hello-world"
+    secrets:
+      app_id: ${{ secrets.RELEASE_BOT_ID }}
+      private_key: ${{ secrets.RELEASE_BOT_KEY }}
+    needs: [ cdk-diff-stage, cdk-deploy-stage, eks-deploy-stage ]
+
   eks-deploy-prod:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: ArgoCD deploy to Prod
