@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   values-update-stage:
-    name: Update Values in Deployment Repo
+    name: Update Values Only - Prod
     uses: truemark/github-workflows/.github/workflows/values-only-update.yml@argocd-demo
     with:
       app_name: "hello-world"
