@@ -17,3 +17,5 @@ istio:
 env:
   LOG_LEVEL:
     value: "DEBUG"
+  NODE_ENV:
+    value: "stage"
