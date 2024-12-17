@@ -22,4 +22,4 @@ deployment:
     NODE_ENV:
       value: "stage"
   image:
-    tag: 61.291.1
+    tag: latest
