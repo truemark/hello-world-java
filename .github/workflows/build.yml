@@ -8,8 +8,8 @@ on:
       - hotfix/*
   pull_request:
      branches:
-      - main
-      - develop
+      - main-louie
+      - develop-louie
       - hotfix/*
 permissions:
   id-token: write
