@@ -16,7 +16,7 @@ istio:
                     number: 80
 env:
   LOG_LEVEL:
-    value: "DEBUG"
+    value: "TRACE"
   NODE_ENV:
     value: "stage"
 
