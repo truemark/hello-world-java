@@ -4,6 +4,9 @@
 
 replicaCount: 1
 
+env:
+  - name: MESSAGE
+    value: "Hello, World from the Helm!"
 
 image:
   repository: public.ecr.aws/truemark/helloworld-java
@@ -60,9 +63,14 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
-nodeSelector: {}
+nodeSelector:
+  karpenter.sh/nodepool: truemark-amd64
 
-tolerations: []
+tolerations:
+  - key: "karpenter.sh/nodepool"
+    operator: "Equal"
+    value: "truemark-amd64"
+    effect: "NoSchedule"
 
 affinity: {}
 
@@ -76,11 +84,11 @@ istio:
       tls:
         httpsRedirect: true
       hosts:
-        - "*"
+        - "hello.stage.truemark.io"
     - port:
         number: 443
         name: https
         protocol: HTTP
       hosts:
-        - "*"
+        - "hello.stage.truemark.io"
 
