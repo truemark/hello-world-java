@@ -19,3 +19,7 @@ env:
     value: "DEBUG"
   NODE_ENV:
     value: "stage"
+
+deployment:
+  image:
+    tag: 61.291.1
