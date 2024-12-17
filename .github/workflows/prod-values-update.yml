@@ -4,8 +4,7 @@ on:
   push:
     paths:
       - 'kubernetes/prod/**'
-    paths-ignore:
-      - .github/**
+      - '!.github/**'
 
 
 permissions:

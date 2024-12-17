@@ -4,8 +4,7 @@ on:
   push:
     paths:
       - 'kubernetes/stage/**'
-    paths-ignore:
-      - .github/**
+      - '!.github/**'
 
 permissions:
   id-token: write
