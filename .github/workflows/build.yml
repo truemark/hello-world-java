@@ -76,6 +76,7 @@ jobs:
     uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
     with:
       environment: "stage"
+      app_name: "hello-world"
     secrets:
       app-id: ${{ secrets.RELEASE_BOT_ID }}
       private-key: ${{ secrets.RELEASE_BOT_KEY }}
@@ -109,6 +110,7 @@ jobs:
     uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
     with:
       environment: "prod"
+      app_name: "hello-world"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
       app-id: ${{ secrets.RELEASE_BOT_ID }}
