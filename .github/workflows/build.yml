@@ -37,7 +37,9 @@ jobs:
     needs: [ build-maven ]
 
   cdk-diff-stage:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop-louie'
+    if: >
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/develop-louie' || startsWith(github.ref, 'refs/heads/hotfix/'))
     name: CDK diff to Stage
     uses: truemark/github-workflows/.github/workflows/cdk-diff.yml@argocd-demo
     with:
@@ -48,7 +50,9 @@ jobs:
     needs: [ build-maven ]
 
   cdk-deploy-stage:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop-louie'
+    if: >
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/develop-louie' || startsWith(github.ref, 'refs/heads/hotfix/'))
     name: CDK deploy to Stage
     uses: truemark/github-workflows/.github/workflows/cdk-deploy.yml@argocd-demo
     with:
@@ -59,7 +63,9 @@ jobs:
     needs: [ cdk-diff-stage ]
 
   eks-deploy-stage:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop-louie'
+    if: >
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/develop-louie' || startsWith(github.ref, 'refs/heads/hotfix/'))
     name: ArgoCD deploy to Stage
     uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
     with:
@@ -71,7 +77,9 @@ jobs:
     needs: [ build-docker, cdk-deploy-stage ]
 
   cdk-diff-prod:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main-louie'
+    if: >
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main-louie' || startsWith(github.ref, 'refs/heads/hotfix/'))
     name: CDK diff to Prod
     uses: truemark/github-workflows/.github/workflows/cdk-diff.yml@argocd-demo
     with:
@@ -79,10 +87,12 @@ jobs:
       aws_region: "us-east-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
-    needs: [ cdk-deploy-stage ]
+    needs: [ build-maven ]
 
   cdk-deploy-prod:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main-louie'
+    if: >
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main-louie' || startsWith(github.ref, 'refs/heads/hotfix/'))
     name: CDK deploy to Prod
     uses: truemark/github-workflows/.github/workflows/cdk-deploy.yml@argocd-demo
     with:
@@ -93,7 +103,9 @@ jobs:
     needs: [ cdk-diff-prod ]
 
   eks-deploy-prod:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main-louie'
+    if: >
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main-louie' || startsWith(github.ref, 'refs/heads/hotfix/'))
     name: ArgoCD deploy to Prod
     uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
     with:
