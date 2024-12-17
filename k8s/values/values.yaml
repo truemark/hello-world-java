@@ -17,6 +17,8 @@ deployment:
           fieldPath: metadata.name
     VAR:
       value: "test"
+    LOG_LEVEL:
+      value: "INFO"
   tolerations:
     - key: "karpenter.sh/nodepool"
       operator: "Equal"
