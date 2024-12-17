@@ -3,8 +3,8 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
-      - develop
+      - main-louie
+      - develop-louie
       - hotfix/*
   pull_request:
      branches:
