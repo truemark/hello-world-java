@@ -47,7 +47,7 @@ jobs:
       aws_region: "us-east-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
-    needs: [ build-maven ]
+    needs: [ build-docker ]
 
   cdk-deploy-stage:
     if: >
@@ -87,7 +87,7 @@ jobs:
       aws_region: "us-east-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
-    needs: [ build-maven ]
+    needs: [ build-docker ]
 
   cdk-deploy-prod:
     if: >
