@@ -1,8 +1,15 @@
+name: Build and Deploy
 on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - main-louie
+      - develop-louie
+      - hotfix/*
+  pull_request:
+     branches:
+      - main-louie
+      - develop-louie
       - hotfix/*
 permissions:
   id-token: write
@@ -10,52 +17,102 @@ permissions:
 jobs:
   build-maven:
     name: Build Maven
-    uses: ./.github/workflows/build-maven.yml
+    uses: truemark/github-workflows/.github/workflows/build-maven.yml@argocd-demo
+    if: >
+      github.event_name == 'push' && (github.ref == 'refs/heads/main-louie' || github.ref == 'refs/heads/develop-louie' || startsWith(github.ref, 'refs/heads/hotfix/')) || 
+      (github.event_name == 'pull_request' && (github.base_ref == 'main-louie' || github.base_ref == 'develop-louie' || startsWith(github.base_ref, 'hotfix/')))
     with:
       version: 61.${{ github.run_number }}.${{ github.run_attempt }}
       java_version: 21
       java_distribution: "corretto"
+
   build-docker:
     name: Build Docker
-    uses: ./.github/workflows/build-docker.yml
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
+    uses: truemark/github-workflows/.github/workflows/build-docker.yml@argocd-demo
+    if: >
+      github.event_name == 'push' && (github.ref == 'refs/heads/main-louie' || github.ref == 'refs/heads/develop-louie' || startsWith(github.ref, 'refs/heads/hotfix/')) ||
+      (github.event_name == 'pull_request' && (github.base_ref == 'main-louie' || github.base_ref == 'develop-louie' || startsWith(github.base_ref, 'hotfix/')))
     with:
       version: 61.${{ github.run_number }}.${{ github.run_attempt }}
       image_name: "truemark/helloworld-java"
+      aws_region: "us-east-1"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
       docker_hub_username: ${{ secrets.DOCKER_HUB_USERNAME }}
       docker_hub_password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-    needs: [build-maven]
-  diff-stage:
+    needs: [ build-maven ]
+
+  cdk-diff-stage:
+    if: >
+      github.event_name == 'push' && (github.ref == 'refs/heads/develop-louie' || startsWith(github.ref, 'refs/heads/hotfix/')) ||
+      (github.event_name == 'pull_request' && (github.base_ref == 'main-louie' || github.base_ref == 'develop-louie' || startsWith(github.base_ref, 'hotfix/')))
     name: CDK diff to Stage
-    uses: ./.github/workflows/cdk-diff.yml
+    uses: truemark/github-workflows/.github/workflows/cdk-diff.yml@argocd-demo
     with:
       environment: "stage"
+      aws_region: "us-east-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
     needs: [ build-maven ]
-  deploy-stage:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
-    name: Deploy to Stage
-    uses: ./.github/workflows/deploy.yml
+
+  cdk-deploy-stage:
+    if: >
+      github.event_name == 'push' && (github.ref == 'refs/heads/develop-louie' || startsWith(github.ref, 'refs/heads/hotfix/')) ||
+      (github.event_name == 'pull_request' && (github.base_ref == 'main-louie' || github.base_ref == 'develop-louie' || startsWith(github.base_ref, 'hotfix/')))
+    name: CDK deploy to Stage
+    uses: truemark/github-workflows/.github/workflows/cdk-deploy.yml@argocd-demo
     with:
       environment: "stage"
-    needs: [diff-stage, build-docker]
+      aws_region: "us-east-2"
+    secrets:
+      aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
+    needs: [ cdk-diff-stage ]
+
+  eks-deploy-stage:
+    if: >
+      github.event_name == 'push' && (github.ref == 'refs/heads/develop-louie' || startsWith(github.ref, 'refs/heads/hotfix/')) ||
+      (github.event_name == 'pull_request' && (github.base_ref == 'main-louie' || github.base_ref == 'develop-louie' || startsWith(github.base_ref, 'hotfix/')))
+    name: ArgoCD deploy to Stage
+    uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
+    with:
+      environment: "stage"
+      app_name: "hello-world"
+    secrets:
+      app-id: ${{ secrets.RELEASE_BOT_ID }}
+      private-key: ${{ secrets.RELEASE_BOT_KEY }}
+    needs: [ build-docker, cdk-deploy-stage ]
+
+  cdk-diff-prod:
+    if: github.ref == 'refs/heads/main-louie' || startsWith(github.ref, 'refs/heads/hotfix/')
+    name: CDK diff to Prod
+    uses: truemark/github-workflows/.github/workflows/cdk-diff.yml@argocd-demo
+    with:
+      environment: "prod"
+      aws_region: "us-east-2"
+    secrets:
+      aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
+    needs: [ cdk-deploy-stage ]
+
   cdk-deploy-prod:
+    if: github.ref == 'refs/heads/main-louie' || startsWith(github.ref, 'refs/heads/hotfix/')
     name: CDK deploy to Prod
-    uses: ./.github/workflows/cdk-deploy.yml
+    uses: truemark/github-workflows/.github/workflows/cdk-deploy.yml@argocd-demo
     with:
       environment: "prod"
+      aws_region: "us-east-2"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
-    needs: [diff-stage, build-docker]
+    needs: [ cdk-diff-prod ]
+
   eks-deploy-prod:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/hotfix/')
-    name: Deploy to Prod
-    uses: ./.github/workflows/deploy.yml
+    if: github.ref == 'refs/heads/main-louie' || startsWith(github.ref, 'refs/heads/hotfix/')
+    name: ArgoCD deploy to Prod
+    uses: truemark/github-workflows/.github/workflows/argo-deploy.yml@argocd-demo
     with:
       environment: "prod"
-    needs: [cdk-deploy-prod]
+      app_name: "hello-world"
     secrets:
       aws_assume_role: ${{ secrets.AWS_ASSUME_ROLE }}
+      app-id: ${{ secrets.RELEASE_BOT_ID }}
+      private-key: ${{ secrets.RELEASE_BOT_KEY }}
+    needs: [ cdk-diff-stage, cdk-deploy-stage, eks-deploy-stage ]
