@@ -18,8 +18,6 @@ istio:
 deployment:
   env:
     LOG_LEVEL:
-      value: "TRACE"
-    NODE_ENV:
-      value: "stage"
+      value: "DEBUG"
   image:
-    tag: 61.303.1
+    tag: 61.307.1
