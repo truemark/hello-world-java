@@ -21,4 +21,4 @@ deployment:
     FOO:
       value: "BAR"
   image:
-    tag: 61.316.1
+    tag: 61.319.1
