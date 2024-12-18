@@ -19,6 +19,6 @@ deployment:
     LOG_LEVEL:
       value: "WARNING"
     MESSAGE:
-      value: "Louie Testing!"
+      value: "Louie Testing!!"
   image:
     tag: 61.316.1
