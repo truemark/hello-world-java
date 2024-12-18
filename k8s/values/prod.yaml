@@ -14,7 +14,6 @@ istio:
                   host: hello-world
                   port:
                     number: 80
-
 deployment:
   env:
     LOG_LEVEL:
@@ -22,4 +21,4 @@ deployment:
     NODE_ENV:
       value: "prod"
   image:
-    tag: 61.297.1
+    tag: 61.314.1
