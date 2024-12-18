@@ -19,5 +19,7 @@ deployment:
   env:
     LOG_LEVEL:
       value: "DEBUG"
+    MESSAGE:
+        value: "Welcome to ArgoCD!"
   image:
-    tag: 61.311.1
+    tag: 61.316.1
