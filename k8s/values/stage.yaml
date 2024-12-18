@@ -18,7 +18,7 @@ istio:
 deployment:
   env:
     LOG_LEVEL:
-      value: "DEBUG"
+      value: "WARNING"
     MESSAGE:
       value: "Welcome to ArgoCD!"
   image:
