@@ -19,6 +19,6 @@ deployment:
     LOG_LEVEL:
       value: "WARNING"
     MESSAGE:
-      value: "Welcome to ArgoCD!"
+      value: "Louie Testing"
   image:
     tag: 61.316.1
