@@ -14,7 +14,6 @@ istio:
                   host: hello-world
                   port:
                     number: 80
-
 deployment:
   env:
     LOG_LEVEL:
