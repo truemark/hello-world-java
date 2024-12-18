@@ -12,9 +12,10 @@ deployment:
     karpenter.sh/nodepool: truemark-arm64
   env:
     MESSAGE:
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.name
+      value: "Welcome to ArgoCD!"
+#      valueFrom:
+#        fieldRef:
+#          fieldPath: metadata.name
     VAR:
       value: "test"
     LOG_LEVEL:
