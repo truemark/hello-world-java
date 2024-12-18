@@ -18,6 +18,6 @@ istio:
 deployment:
   env:
     LOG_LEVEL:
-      value: "WARNING"
+      value: "DEBUG"
   image:
-    tag: 61.307.1
+    tag: 61.311.1
