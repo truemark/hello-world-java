@@ -18,5 +18,7 @@ deployment:
   env:
     LOG_LEVEL:
       value: "DEBUG"
+    FOO:
+      value: "BAR"
   image:
     tag: 61.316.1
