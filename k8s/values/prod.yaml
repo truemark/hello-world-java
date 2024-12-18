@@ -21,4 +21,4 @@ deployment:
     NODE_ENV:
       value: "prod"
   image:
-    tag: 61.314.1
+    tag: 61.317.1
