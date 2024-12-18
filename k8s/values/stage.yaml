@@ -14,12 +14,9 @@ istio:
                   host: hello-world
                   port:
                     number: 80
-
 deployment:
   env:
     LOG_LEVEL:
-      value: "TRACE"
-    NODE_ENV:
-      value: "stage"
+      value: "DEBUG"
   image:
-    tag: 61.300.1
+    tag: 61.313.1
