@@ -19,4 +19,4 @@ deployment:
     LOG_LEVEL:
       value: "DEBUG"
   image:
-    tag: 61.313.1
+    tag: 61.316.1
